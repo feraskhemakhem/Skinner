@@ -25,9 +25,10 @@ using namespace glm;
 
 GLFWwindow *window; // Main application window
 string RESOURCE_DIR = ""; // Where the resources are loaded from
-string MESH_FILE = "";
-string ATTACHMENT_FILE = "";
-string SKELETON_FILE = "";
+// string MESH_FILE = "";
+// string ATTACHMENT_FILE = "";
+// string SKELETON_FILE = "";
+int NUM_BONES = 2; // 2 bones by default
 bool keyToggles[256] = {false};
 
 shared_ptr<Camera> camera = NULL;
@@ -93,8 +94,8 @@ void loadScene(const string &meshFile, const string &attachmentFile, const strin
 	shape = make_shared<ShapeSkin>();
 	shape->loadMesh(meshFile);
 
-    shape->loadAttachment(attachmentFile, walker);
-    // This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
+	shape->loadAttachment(attachmentFile, walker);
+	// This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
 	shape->loadSkeleton(skeletonFile, walker);
 
 	// For drawing the grid, etc.
@@ -237,77 +238,58 @@ void render()
 		glVertex3f( gridSizeHalf, 0, z);
 	}
 	glEnd();
-    int timeScale = (int)(t*100); // determines the relative speed of cheb
-    if(!keyToggles[(unsigned)'b']) {
-        // drawing bones
-        float boneScale = 0.05f; // determines the size of the bones
-        for (int i = 0; i < 18; ++i) { // for 18 bones
-            MV->pushMatrix();
-    //        MV->multMatrix(glm::inverse(walker->getBind(i)));
-            MV->multMatrix(walker->getAnime(timeScale, i));
-            glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-            glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            glColor3f(1, 0, 0);
-            glVertex3f(0, 0, 0);
-            glVertex3f(boneScale, 0, 0);
-            glColor3f(0, 1, 0);
-            glVertex3f(0, 0, 0);
-            glVertex3f(0, boneScale, 0);
-            glColor3f(0, 0, 1);
-            glVertex3f(0, 0, 0);
-            glVertex3f(0, 0, boneScale);
-            glEnd();
-            MV->popMatrix();
-        }
-    }
-    
+    // int timeScale = (int)(t*100); // determines the relative speed of cheb
+    // if(!keyToggles[(unsigned)'b']) {
+    //     // drawing bones
+    //     float boneScale = 0.05f; // determines the size of the bones
+    //     for (int i = 0; i < 18; ++i) { // for 18 bones
+    //         MV->pushMatrix();
+    // //        MV->multMatrix(glm::inverse(walker->getBind(i)));
+    //         MV->multMatrix(walker->getAnime(timeScale, i));
+    //         glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+    //         glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+    //         glLineWidth(2);
+    //         glBegin(GL_LINES);
+    //         glColor3f(1, 0, 0);
+    //         glVertex3f(0, 0, 0);
+    //         glVertex3f(boneScale, 0, 0);
+    //         glColor3f(0, 1, 0);
+    //         glVertex3f(0, 0, 0);
+    //         glVertex3f(0, boneScale, 0);
+    //         glColor3f(0, 0, 1);
+    //         glVertex3f(0, 0, 0);
+    //         glVertex3f(0, 0, boneScale);
+    //         glEnd();
+    //         MV->popMatrix();
+    //     }
+    // }		
+
     progSimple->unbind();
 
     
-    if(!keyToggles[(unsigned)'q']) {
-        // Draw character
-        MV->pushMatrix();
-        progSkin->bind();
-        
-        glUniformMatrix4fv(progSkin->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-        glUniformMatrix4fv(progSkin->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-        glUniform3f(progSkin->getUniform("lightPos"), 10.0f, 10.0f, 10.0f); // in camera coordinates back left corner
-        glUniform3f(progSkin->getUniform("kd"), 0.3f, 0.3f, 0.3f); // diffused colour
-        glUniform3f(progSkin->getUniform("ks"), 0.5f, 0.5f, 0.5f); // specular colour
-        glUniform1f(progSkin->getUniform("s"), 200.0f);
-        glUniform3f(progSkin->getUniform("ka"), 0.0f, 0.3f, 1.0f); // ambient colour (rgb)
-        shape->skinOn(walker, timeScale);
+		// Draw character
+		MV->pushMatrix();
+		progSkin->bind();
+		
+		glUniformMatrix4fv(progSkin->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+		glUniformMatrix4fv(progSkin->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+		glUniform3f(progSkin->getUniform("lightPos"), 10.0f, 10.0f, 10.0f); // in camera coordinates back left corner
 
-        shape->setProgram(progSkin);
-        shape->draw();
-        GLSL::checkError(GET_FILE_LINE);
+		// colouring
+		glUniform3f(progSkin->getUniform("kd"), 0.3f, 0.3f, 0.3f); // diffused colour
+		glUniform3f(progSkin->getUniform("ks"), 0.5f, 0.5f, 0.5f); // specular colour
+		glUniform1f(progSkin->getUniform("s"), 200.0f);
+		glUniform3f(progSkin->getUniform("ka"), 0.0f, 0.3f, 1.0f); // ambient colour (rgb)
 
-        progSkin->unbind();
-        MV->popMatrix();
-    }
-    else {
-        MV->pushMatrix();
-        progBonus->bind();
+		// apply skin
+		shape->skinOn(walker, timeScale);
 
-        glUniformMatrix4fv(progBonus->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-        glUniformMatrix4fv(progBonus->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-        glUniformMatrix4fv(progBonus->getUniform("anime"), 18, GL_FALSE, glm::value_ptr(walker->getAnimeV(timeScale)[0]));
-        glUniformMatrix4fv(progBonus->getUniform("bind"), 18, GL_FALSE, glm::value_ptr(walker->getBindV()[0]));
-        glUniform3f(progBonus->getUniform("lightPos"), 10.0f, 10.0f, 10.0f); // in camera coordinates back left corner
-        glUniform3f(progBonus->getUniform("kd"), 0.3f, 0.3f, 0.3f); // diffused colour
-        glUniform3f(progBonus->getUniform("ks"), 0.5f, 0.5f, 0.5f); // specular colour
-        glUniform1f(progBonus->getUniform("s"), 200.0f);
-        glUniform3f(progBonus->getUniform("ka"), 0.0f, 0.3f, 1.0f); // ambient colour (rgb)
-        
-        shape->setProgram(progBonus);
-        shape->draw(true);
-        GLSL::checkError(GET_FILE_LINE);
-        
-        progBonus->unbind();
-        MV->popMatrix();
-    }
+		shape->setProgram(progSkin);
+		shape->draw();
+		GLSL::checkError(GET_FILE_LINE);
+
+		progSkin->unbind();
+		MV->popMatrix();
     
 	// Pop matrix stacks.
 	MV->popMatrix();
@@ -317,14 +299,12 @@ void render()
 
 int main(int argc, char **argv)
 {
-	if(argc < 5) {
-		cout << "Usage: Assignment2 <SHADER DIR> <MESH FILE> <ATTACHMENT FILE> <SKELETON FILE>" << endl;
+	if(argc < 3) {
+		cout << "Usage: Assignment2 <SHADER DIR> <NUM BONES>" << endl;
 		return 0;
 	}
 	RESOURCE_DIR = argv[1] + string("/");
-	MESH_FILE = argv[2];
-	ATTACHMENT_FILE = argv[3];
-	SKELETON_FILE = argv[4];
+	NUM_BONES = argv[2];
 	
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);

@@ -33,7 +33,8 @@ ShapeSkin::~ShapeSkin()
 {
 }
 
-void ShapeSkin::loadMesh(const string &meshName)
+// this loads the obj, so in our case we will draw a rectangle
+void ShapeSkin::loadMesh(const int num_bones)
 {
 	// Load geometry
 	tinyobj::attrib_t attrib;
@@ -70,7 +71,9 @@ void ShapeSkin::loadMesh(const string &meshName)
 	}
 }
 
-void ShapeSkin::loadAttachment(const std::string &filename, std::shared_ptr<Skinner> skin)
+// takes in the number of bones and the skin, and over time applies different 
+// attachment file is a file of vertices... this will just be inside the rectangle hearts
+void ShapeSkin::loadAttachment(std::shared_ptr<Skinner> skin)
 {
 	int nverts, nbones;
 	ifstream in;
@@ -88,7 +91,7 @@ void ShapeSkin::loadAttachment(const std::string &filename, std::shared_ptr<Skin
 	ss0 >> nbones;
 	assert(nverts == posBuf.size()/3);
 
-//     for filling in weights
+    // for filling in weights
     float dummi;
     int i = 0;
 	while(1) {
@@ -126,7 +129,8 @@ void ShapeSkin::loadAttachment(const std::string &filename, std::shared_ptr<Skin
 	in.close();
 }
 
-void ShapeSkin::loadSkeleton(const std::string &filename, std::shared_ptr<Skinner> skin)
+// this is the animation that the vertices do, in x y format
+void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 {
     int nverts, nbones;
     ifstream in;
