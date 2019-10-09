@@ -33,10 +33,10 @@ ShapeSkin::~ShapeSkin()
 {
 }
 
-// this loads the obj, so in our case we will draw a rectangle
-void ShapeSkin::loadMesh(const int num_bones)
+// this loads the obj, so in our case we will load a rectangle
+void ShapeSkin::loadMesh(const string &meshName)
 {
-	// Load geometry
+	// Load geometry 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -71,130 +71,110 @@ void ShapeSkin::loadMesh(const int num_bones)
 	}
 }
 
-// takes in the number of bones and the skin, and over time applies different 
-// attachment file is a file of vertices... this will just be inside the rectangle hearts
-void ShapeSkin::loadAttachment(std::shared_ptr<Skinner> skin)
-{
-	int nverts, nbones;
-	ifstream in;
-	in.open(filename);
-	if(!in.good()) {
-		cout << "Cannot read " << filename << endl;
-		return;
-	}
-	string line;
-	getline(in, line); // comment
-	getline(in, line); // comment
-	getline(in, line);
-	stringstream ss0(line);
-	ss0 >> nverts;
-	ss0 >> nbones;
-	assert(nverts == posBuf.size()/3);
+void ShapeSkin::loadMesh(const int num_vertices, const int height, const int width) {
 
-    // for filling in weights
-    float dummi;
-    int i = 0;
-	while(1) {
-		getline(in, line);
-		if(in.eof()) {
-			break;
-		}
-		// Parse line
-		stringstream ss(line);
-        //
-        // IMPLEMENT ME
-        // actually adding in weights tho
-        skin->pushWeight();
-        numInfl.push_back(0);
-        int internalCount = 0;
-        for (int j = 0; j < nbones; ++j) {
-            ss >> dummi;
-            skin->addWeight(i, dummi);
-            if ((dummi * 100.0f) != 0.0f) {
-                internalCount++;
-                numInfl.at(i) = numInfl.at(i) + 1;
-                weiBuf.push_back(dummi);
-                bonBuf.push_back(j);
-            }
+    // determine how much to seperate each vertex, and the set points
+    float dist_seperation = width / (num_vertices / 2);
+    float current_x = -1 * width / 2;
 
-        }
-        for (int j = 0; j < (16 - internalCount); ++j) {
-            weiBuf.push_back(0.0f);
-            bonBuf.push_back(0.0f);
-        }
+    // first vertex is at -width/2, all the way to width/2
+    while (current_x <= width / 2) {
+        // add lower vertex
+        posBuf.push_back(current_x);
+        posBuf.push_back(-1 * height / 2);
+        posBuf.push_back(0);
         
-        ++i;
+        // add upper vertex
+        posBuf.push_back(current_x);
+        posBuf.push_back(height / 2);
+        posBuf.push_back(0);
 
-	}
-	in.close();
+        current_x += dist_seperation;
+    }
+    skinnedPos = posBuf;
+
+    // norBuf = attrib.normals; // TODO - normals
+    // skinnedNor = norBuf;
+    // assert(posBuf.size() == norBuf.size());
+    
+    // no shapes to loop because no groups object names
 }
 
-// this is the animation that the vertices do, in x y format
-void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
+// takes in the number of bones and the skin, and over time applies different 
+// attachment file is a file of vertices... this will just be inside the rectangle hearts
+// void ShapeSkin::loadAttachment(std::shared_ptr<Skinner> skin, const int num_bones)
+// {
+// 	int nverts, nbones;
+//     nbones = num_bones;
+//     nverts = 4; // rectangles always have 4
+// 	assert(nverts == posBuf.size()/3);
+
+//     // for filling in weights
+//     float dummi;
+// 	for (int i = 0; i < nverts; ++i) {
+//         // actually adding in weights, for one vertex
+//         skin->pushWeight();
+//         numInfl.push_back(0);
+//         int internalCount = 0;
+//         for (int j = 0; j < nbones; ++j) {
+//             // dummi is the weight
+//             skin->addWeight(i, dummi);
+//             if ((dummi * 100.0f) != 0.0f) {
+//                 internalCount++;
+//                 numInfl.at(i) = numInfl.at(i) + 1;
+//                 weiBuf.push_back(dummi);
+//                 bonBuf.push_back(j);
+//             }
+
+//         }
+//         for (int j = 0; j < (16 - internalCount); ++j) {
+//             weiBuf.push_back(0.0f);
+//             bonBuf.push_back(0.0f);
+//         }
+        
+// 	}
+// 	in.close();
+// }
+
+// this is the animation that the vertices do, in x y z format
+void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin, const int num_bones)
 {
+    this->num_bones = num_bones;
     int nverts, nbones;
-    ifstream in;
-    in.open(filename);
-    if(!in.good()) {
-        cout << "Cannot read " << filename << endl;
-        return;
-    }
-    string line;
-    getline(in, line); // comment
-    getline(in, line); // comment
-    getline(in, line); // comment
-    getline(in, line);
-    stringstream ss0(line);
-    ss0 >> nverts;
-    ss0 >> nbones;
+    nverts = 4;
+    nbones = num_bones;
 
     
     // read first line of points and quaternions
-    getline(in, line);
-    stringstream ss(line);
     glm::quat q; // quaternion
     glm::vec3 p; // position
     glm::mat4 E;
     for (int i = 0; i < nbones; ++i) {
-        // we read the first line seperately in order to yeah
-        ss >> q.x;
-        ss >> q.y;
-        ss >> q.z;
-        ss >> q.w;
-        ss >> p.x;
-        ss >> p.y;
-        ss >> p.z;
+        // we read the first line seperately in order to have the initial
         E = mat4_cast(q); // converting each 7-tuple to one 4x4 trans matrix
         E[3] = glm::vec4(p, 1.0f);
         skin->addBind(E);
     }
     
-    int j = 0; // vert counter
-    while(1) {
-        getline(in, line);
-        if(in.eof()) {
-            break;
-        }
-        // Parse line
-        stringstream ss(line);
-        //
-        // IMPLEMENT ME
-        //
+    for (int j =0; j < nverts; ++j) {
         // we read the the rest of the lines are not bind pose so yeah
         skin->pushAnime();
         for (int i = 0; i < nbones; ++i) {
-            ss >> q.x;
-            ss >> q.y;
-            ss >> q.z;
-            ss >> q.w;
-            ss >> p.x;
-            ss >> p.y;
-            ss >> p.z;
+            // rotate 45 degree across y axis
+            q.x = 0;
+            q.y = cos(PI / 8);
+            q.z = cos(PI / 8);
+            q.w = 0;
+
+            // do not move, just rotate
+            p.x = 0;
+            p.y = 0;
+            p.z = 0;
+            
             E = mat4_cast(q); // converting each 7-tuple to one 4x4 trans matrix
             E[3] = glm::vec4(p, 1.0f);
             skin->addAnime(j, E);
         }
-        j++;
         
     }
     in.close();
@@ -217,15 +197,17 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(16*i+j);
             // skinned positions
-            glm::vec4 dum1 = skin->getBind(bone) * x;
-            glm::vec4 dum2 = skin->getAnime(k, bone) * dum1;
-            glm::vec4 dum3 = weiBuf.at(16*i+j) * dum2;
+            glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            glm::vec4 dum2 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
+            glm::vec4 dum3 = 1.0 / ((k % 10) + 1) * dum2; // apply weight of ith vertex on jth bone
+            // glm::vec4 dum3 = weiBuf.at(16*i+j) * dum2;
             position = position + dum3;
 
             // skinned normals
             glm::vec4 dum4 = skin->getBind(bone) * y;
             glm::vec4 dum5  = skin->getAnime(k, bone) * dum4;
-            glm::vec4 dum6 = weiBuf.at(16*i+j) * dum5;
+            // glm::vec4 dum6 = weiBuf.at(16*i+j) * dum5;
+            glm::vec4 dum6 = 
             normal = normal + dum6;
         }
         

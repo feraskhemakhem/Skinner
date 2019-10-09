@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <cstdlib>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -25,10 +26,11 @@ using namespace glm;
 
 GLFWwindow *window; // Main application window
 string RESOURCE_DIR = ""; // Where the resources are loaded from
-// string MESH_FILE = "";
-// string ATTACHMENT_FILE = "";
-// string SKELETON_FILE = "";
 int NUM_BONES = 2; // 2 bones by default
+int NUM_VERTCIES = 4;
+int RECT_LENGTH = 10;
+int RECT_WIDTH = 20;
+float COEFFICIENT = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
 
 shared_ptr<Camera> camera = NULL;
@@ -94,9 +96,9 @@ void loadScene(const string &meshFile, const string &attachmentFile, const strin
 	shape = make_shared<ShapeSkin>();
 	shape->loadMesh(meshFile);
 
-	shape->loadAttachment(attachmentFile, walker);
+	// shape->loadAttachment(walker, NUM_BONES);
 	// This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
-	shape->loadSkeleton(skeletonFile, walker);
+	shape->loadSkeleton(walker, NUM_BONES);
 
 	// For drawing the grid, etc.
 	progSimple = make_shared<Program>();
@@ -117,7 +119,7 @@ void init()
 {
     
     // my skinner things
-    walker = make_shared<Skinner>(18);
+    walker = make_shared<Skinner>(NUM_BONES);
 
 	// Non-OpenGL things
 	loadScene(MESH_FILE, ATTACHMENT_FILE, SKELETON_FILE);
@@ -238,31 +240,31 @@ void render()
 		glVertex3f( gridSizeHalf, 0, z);
 	}
 	glEnd();
-    // int timeScale = (int)(t*100); // determines the relative speed of cheb
-    // if(!keyToggles[(unsigned)'b']) {
-    //     // drawing bones
-    //     float boneScale = 0.05f; // determines the size of the bones
-    //     for (int i = 0; i < 18; ++i) { // for 18 bones
-    //         MV->pushMatrix();
-    // //        MV->multMatrix(glm::inverse(walker->getBind(i)));
-    //         MV->multMatrix(walker->getAnime(timeScale, i));
-    //         glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-    //         glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-    //         glLineWidth(2);
-    //         glBegin(GL_LINES);
-    //         glColor3f(1, 0, 0);
-    //         glVertex3f(0, 0, 0);
-    //         glVertex3f(boneScale, 0, 0);
-    //         glColor3f(0, 1, 0);
-    //         glVertex3f(0, 0, 0);
-    //         glVertex3f(0, boneScale, 0);
-    //         glColor3f(0, 0, 1);
-    //         glVertex3f(0, 0, 0);
-    //         glVertex3f(0, 0, boneScale);
-    //         glEnd();
-    //         MV->popMatrix();
-    //     }
-    // }		
+    int timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
+    if(!keyToggles[(unsigned)'b']) {
+        // drawing bones
+        float boneScale = 0.05f; // determines the size of the bones
+        for (int i = 0; i < NUM_BONES; ++i) { // for 18 bones
+            MV->pushMatrix();
+   				  // MV->multMatrix(glm::inverse(walker->getBind(i)));
+            MV->multMatrix(walker->getAnime(timeScale, i));
+            glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+            glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+            glLineWidth(2);
+            glBegin(GL_LINES);
+            glColor3f(1, 0, 0);
+            glVertex3f(0, 0, 0);
+            glVertex3f(boneScale, 0, 0);
+            glColor3f(0, 1, 0);
+            glVertex3f(0, 0, 0);
+            glVertex3f(0, boneScale, 0);
+            glColor3f(0, 0, 1);
+            glVertex3f(0, 0, 0);
+            glVertex3f(0, 0, boneScale);
+            glEnd();
+            MV->popMatrix();
+        }
+    }		
 
     progSimple->unbind();
 
@@ -299,12 +301,16 @@ void render()
 
 int main(int argc, char **argv)
 {
-	if(argc < 3) {
-		cout << "Usage: Assignment2 <SHADER DIR> <NUM BONES>" << endl;
+	if(argc < 5) {
+		cout << "Usage: ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>" << endl;
 		return 0;
 	}
-	RESOURCE_DIR = argv[1] + string("/");
-	NUM_BONES = argv[2];
+	// RESOURCE_DIR = argv[1] + string("/");
+	RESOURCE_DIR = "../resources/";
+	NUM_BONES = argc > 1 ? atoi(argv[2]) : 2;
+	NUM_VERTICES = argc > 2 ? atoi(argv[3]) : 4;
+	RECT_WIDTH = argc > 3 ? atoi(argv[4]) : 20;
+	RECT_LENGTH = argc > 4 ? atoi(argv[5]) : 10;
 	
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);
@@ -313,7 +319,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	// Create a windowed mode window and its OpenGL context.
-	window = glfwCreateWindow(640, 480, "Feras Khemakhem", NULL, NULL);
+	window = glfwCreateWindow(640, 480, "LBS - QBS skinner", NULL, NULL);
 	if(!window) {
 		glfwTerminate();
 		return -1;

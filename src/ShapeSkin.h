@@ -4,6 +4,9 @@
 
 #include <memory>
 #include <vector>
+#include <math.h>
+
+#define PI 3.14159265
 
 class MatrixStack;
 class Program;
@@ -45,14 +48,16 @@ public:
 	ShapeSkin();
 	virtual ~ShapeSkin();
 	void loadMesh(const std::string &meshName);
-    void loadAttachment(const std::string &filename, std::shared_ptr<Skinner> skin);
-    void loadSkeleton(const std::string &filename, std::shared_ptr<Skinner> skin);
+    void loadMesh(const int num_vertices, const int height, const int width);
+    // void loadAttachment(std::shared_ptr<Skinner> skin, const int num_bones);
+    void loadSkeleton(std::shared_ptr<Skinner> skin, const int num_bones);
 	void setProgram(std::shared_ptr<Program> p) { prog = p; }
 	void init(bool b = false);
 	void draw(bool b = false);
     void skinOn(std::shared_ptr<Skinner> skin, int k);
 	
 private:
+    int num_bones;
 	std::shared_ptr<Program> prog;
 	std::vector<unsigned int> elemBuf;
 	std::vector<float> posBuf;
