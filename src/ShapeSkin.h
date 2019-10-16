@@ -36,7 +36,7 @@ public:
     float getWei(int j, int i) {return weights.at(j%weights.size()).at(i%weights.at(j).size());};
     
     // return vectors for da skinning eq
-    std::vector<glm::mat4> getBindV () {return bindPose;};
+    std::vector<glm::mat4>  V () {return bindPose;};
     std::vector<glm::mat4> getAnimeV (int k) {return boneAnimations.at(k%boneAnimations.size());};
     
 };

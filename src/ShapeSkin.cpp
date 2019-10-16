@@ -160,10 +160,10 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin, const int num_bones)
         // we read the the rest of the lines are not bind pose so yeah
         skin->pushAnime();
         for (int i = 0; i < nbones; ++i) {
-            // rotate 45 degree across y axis
+            // rotate 5 degree across y axis
             q.x = 0;
-            q.y = cos(PI / 8);
-            q.z = cos(PI / 8);
+            q.y = cos(PI / 36);
+            q.z = cos(PI / 36);
             q.w = 0;
 
             // do not move, just rotate
@@ -199,15 +199,13 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
             // skinned positions
             glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
             glm::vec4 dum2 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
-            glm::vec4 dum3 = 1.0 / ((k % 10) + 1) * dum2; // apply weight of ith vertex on jth bone
-            // glm::vec4 dum3 = weiBuf.at(16*i+j) * dum2;
+            glm::vec4 dum3 = weiBuf.at(16*i+j) * dum2; // apply weight of ith vertex on jth bone
             position = position + dum3;
 
             // skinned normals
             glm::vec4 dum4 = skin->getBind(bone) * y;
             glm::vec4 dum5  = skin->getAnime(k, bone) * dum4;
-            // glm::vec4 dum6 = weiBuf.at(16*i+j) * dum5;
-            glm::vec4 dum6 = 
+            glm::vec4 dum6 = weiBuf.at(16*i+j) * dum5;
             normal = normal + dum6;
         }
         
