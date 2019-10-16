@@ -50,7 +50,8 @@ public:
 	void loadMesh(const std::string &meshName);
     void loadMesh(const int num_vertices, const int height, const int width);
     // void loadAttachment(std::shared_ptr<Skinner> skin, const int num_bones);
-    void loadSkeleton(std::shared_ptr<Skinner> skin, const int num_bones);
+    void loadAttachment(const int num_bones, const int width);
+    void loadSkeleton(std::shared_ptr<Skinner> skin);
 	void setProgram(std::shared_ptr<Program> p) { prog = p; }
 	void init(bool b = false);
 	void draw(bool b = false);
@@ -58,6 +59,7 @@ public:
 	
 private:
     int num_bones;
+    int num_vertices;
 	std::shared_ptr<Program> prog;
 	std::vector<unsigned int> elemBuf;
 	std::vector<float> posBuf;
