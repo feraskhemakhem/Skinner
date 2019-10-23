@@ -4,7 +4,14 @@ This project is based on Assignment 6 of Dr. Shinjiro Sueda's (@sueda) CSCE 441 
 off the concept of Linear Blend Skinnning (LBS) and will allow for Dual Quaternion Skinning (DQS) rendering in 2D. The goal of this project
 is to familiarize with the differences in LBS and DQS in 2D and their differences in computational cost and output.
 
-The project currenntly takes the following input:
+To compile the project:
+
+ `
+ cd build
+ make -j4
+`
+
+The project currenntly takes the following input to run:
 
 >  ./A6 [NUM BONES] [NUM VERTICES] [RECT WIDTH] [RECT LENGTH]
 
