@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Camera.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Camera.cpp
 cmath
 -
 iostream
@@ -14,19 +14,19 @@ iostream
 glm/gtc/matrix_transform.hpp
 -
 Camera.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Camera.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Camera.h
 MatrixStack.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/MatrixStack.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.h
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Camera.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Camera.h
 memory
 -
 glm/glm.hpp
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.cpp
 GLSL.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.h
 stdio.h
 -
 stdlib.h
@@ -36,15 +36,15 @@ cassert
 cstring
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.h
 GL/glew.h
 -
 sstream
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/MatrixStack.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.cpp
 MatrixStack.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/MatrixStack.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.h
 stdio.h
 -
 cassert
@@ -56,7 +56,7 @@ glm/glm.hpp
 glm/gtc/matrix_transform.hpp
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/MatrixStack.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.h
 stack
 -
 memory
@@ -64,17 +64,17 @@ memory
 glm/fwd.hpp
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Program.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.cpp
 Program.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Program.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.h
 iostream
 -
 cassert
 -
 GLSL.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.h
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Program.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.h
 map
 -
 string
@@ -82,7 +82,7 @@ string
 GL/glew.h
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/ShapeSkin.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/ShapeSkin.cpp
 iostream
 -
 fstream
@@ -96,27 +96,27 @@ glm/gtc/type_ptr.hpp
 glm/gtx/string_cast.hpp
 -
 tiny_obj_loader.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/tiny_obj_loader.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/tiny_obj_loader.h
 ShapeSkin.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/ShapeSkin.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/ShapeSkin.h
 GLSL.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.h
 Program.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Program.h
-dqconv.cpp
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/dqconv.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.h
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/ShapeSkin.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/ShapeSkin.h
 memory
 -
 vector
 -
-
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/dqconv.cpp
 math.h
 -
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/main.cpp
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/dqconv.cpp
+math.h
+-
+
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/main.cpp
 stdio.h
 -
 stdlib.h
@@ -126,6 +126,8 @@ iostream
 vector
 -
 memory
+-
+cstdlib
 -
 GL/glew.h
 -
@@ -138,17 +140,17 @@ glm/gtc/type_ptr.hpp
 glm/gtx/string_cast.hpp
 -
 GLSL.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/GLSL.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.h
 Program.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Program.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.h
 Camera.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/Camera.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/Camera.h
 MatrixStack.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/MatrixStack.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.h
 ShapeSkin.h
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/ShapeSkin.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/ShapeSkin.h
 
-/Users/feraskhemakhem/Desktop/Research/A6_Updated/src/tiny_obj_loader.h
+/Users/feraskhemakhem/Desktop/Research/Skinner/src/tiny_obj_loader.h
 map
 -
 string

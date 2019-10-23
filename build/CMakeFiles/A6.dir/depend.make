@@ -213,7 +213,6 @@ CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/GLSL.h
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/Program.h
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/ShapeSkin.cpp
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/ShapeSkin.h
-CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/dqconv.cpp
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: ../src/tiny_obj_loader.h
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glew-2.1.0/include/GL/glew.h
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/common.hpp
@@ -323,6 +322,8 @@ CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libr
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/vec3.hpp
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/vec4.hpp
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/vector_relational.hpp
+
+CMakeFiles/A6.dir/src/dqconv.cpp.o: ../src/dqconv.cpp
 
 CMakeFiles/A6.dir/src/main.cpp.o: ../src/Camera.h
 CMakeFiles/A6.dir/src/main.cpp.o: ../src/GLSL.h

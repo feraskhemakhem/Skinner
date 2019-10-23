@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/A6.dir/src/MatrixStack.cpp.o"
   "CMakeFiles/A6.dir/src/Program.cpp.o"
   "CMakeFiles/A6.dir/src/ShapeSkin.cpp.o"
+  "CMakeFiles/A6.dir/src/dqconv.cpp.o"
   "CMakeFiles/A6.dir/src/main.cpp.o"
   "A6.pdb"
   "A6"

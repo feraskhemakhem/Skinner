@@ -48,10 +48,10 @@ RM = /Applications/CMake.app/Contents/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/feraskhemakhem/Desktop/Research/A6_Updated
+CMAKE_SOURCE_DIR = /Users/feraskhemakhem/Desktop/Research/Skinner
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/feraskhemakhem/Desktop/Research/A6_Updated/build
+CMAKE_BINARY_DIR = /Users/feraskhemakhem/Desktop/Research/Skinner/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -126,9 +126,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/feraskhemakhem/Desktop/Research/A6_Updated/build/CMakeFiles /Users/feraskhemakhem/Desktop/Research/A6_Updated/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles /Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/feraskhemakhem/Desktop/Research/A6_Updated/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -330,6 +330,33 @@ src/ShapeSkin.cpp.s:
 	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/ShapeSkin.cpp.s
 .PHONY : src/ShapeSkin.cpp.s
 
+src/dqconv.o: src/dqconv.cpp.o
+
+.PHONY : src/dqconv.o
+
+# target to build an object file
+src/dqconv.cpp.o:
+	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.o
+.PHONY : src/dqconv.cpp.o
+
+src/dqconv.i: src/dqconv.cpp.i
+
+.PHONY : src/dqconv.i
+
+# target to preprocess a source file
+src/dqconv.cpp.i:
+	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.i
+.PHONY : src/dqconv.cpp.i
+
+src/dqconv.s: src/dqconv.cpp.s
+
+.PHONY : src/dqconv.s
+
+# target to generate assembly for a file
+src/dqconv.cpp.s:
+	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.s
+.PHONY : src/dqconv.cpp.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -387,6 +414,9 @@ help:
 	@echo "... src/ShapeSkin.o"
 	@echo "... src/ShapeSkin.i"
 	@echo "... src/ShapeSkin.s"
+	@echo "... src/dqconv.o"
+	@echo "... src/dqconv.i"
+	@echo "... src/dqconv.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
