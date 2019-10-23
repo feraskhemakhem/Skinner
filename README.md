@@ -6,10 +6,10 @@ is to familiarize with the differences in LBS and DQS in 2D and their difference
 
 To compile the project:
 
- `
+ ```
  cd build
  make -j4
-`
+```
 
 The project currenntly takes the following input to run:
 
