@@ -14,7 +14,6 @@
 #include "ShapeSkin.h"
 #include "GLSL.h"
 #include "Program.h"
-#include "dqconv.cpp"
 
 using namespace std;
 
@@ -71,7 +70,7 @@ void ShapeSkin::loadMesh(const string &meshName)
 	}
 }
 
-void ShapeSkin::loadMesh(const int num_vertices, const int height, const int width) {
+void ShapeSkin::loadMesh(const int num_vertices, const int length, const int width) {
     // determine how much to seperate each vertex, and the set points
     float dist_seperation = width / ((num_vertices / 2) - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
     float current_x = -1 * width / 2;
@@ -81,22 +80,22 @@ void ShapeSkin::loadMesh(const int num_vertices, const int height, const int wid
     while (current_x <= width / 2) {
         // add lower vertex
         posBuf.push_back(current_x);
-        posBuf.push_back(-1 * height / 2);
+        posBuf.push_back(-1 * length / 2);
         posBuf.push_back(0);
 
         // add lower normal
         norBuf.push_back(current_x);
-        norBuf.push_back(-1 * height / 2);
+        norBuf.push_back(-1 * length / 2);
         norBuf.push_back(1);
         
         // add upper vertex
         posBuf.push_back(current_x);
-        posBuf.push_back(height / 2);
+        posBuf.push_back(length / 2);
         posBuf.push_back(0);
 
         // add upper normal
         norBuf.push_back(current_x);
-        norBuf.push_back(height / 2);
+        norBuf.push_back(length / 2);
         norBuf.push_back(1);
 
         current_x += dist_seperation;
@@ -105,7 +104,13 @@ void ShapeSkin::loadMesh(const int num_vertices, const int height, const int wid
     skinnedPos = posBuf;
     skinnedNor = norBuf;
     assert(posBuf.size() == norBuf.size());
-    
+
+    // add vertices that make up a face (first and last 2 vertices)
+    elemBuf.push_back(0);
+    elemBuf.push_back(1);
+    elemBuf.push_back(posBuf.size()/3 - 1);
+    elemBuf.push_back(posBuf.size()/3 - 2);
+
     // no shapes to loop because no groups object names
 }
 
@@ -142,13 +147,13 @@ void ShapeSkin::loadMesh(const int num_vertices, const int height, const int wid
 //         }
         
 // 	}
-// 	in.close();
 // }
 
 // load self generated attachment file
 void ShapeSkin::loadAttachment(const int num_bones, const int width) 
 {
     assert (num_bones != 0);
+    this->num_bones = num_bones;
     float dist_seperation = width / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
     float seperation_ratio = (num_bones + 1) / (num_vertices - 1);
     float bone_index, prev_bone, next_bone;
@@ -168,12 +173,20 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             weiBuf.push_back(next_bone/total); // "
             bonBuf.push_back(0);
             bonBuf.push_back(1);
+            weiBuf.push_back(prev_bone/total); // ratio wrt distance
+            weiBuf.push_back(next_bone/total); // "
+            bonBuf.push_back(0);
+            bonBuf.push_back(1);
             continue;
         }
         else if (bone_index > num_bones-1) { // if using the last 2 bones
             next_bone = posBuf.at(3*i) - ((width / 2) - dist_seperation); // between first bone and this vertex
             prev_bone = next_bone + dist_seperation; // double negative in the line above makes it a +
             float total = prev_bone + next_bone;
+            weiBuf.push_back(prev_bone/total); // ratio wrt distance
+            weiBuf.push_back(next_bone/total); // "
+            bonBuf.push_back(0);
+            bonBuf.push_back(1);
             weiBuf.push_back(prev_bone/total); // ratio wrt distance
             weiBuf.push_back(next_bone/total); // "
             bonBuf.push_back(0);
@@ -188,13 +201,19 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         if ((prev_bone - next_bone) < 0.001) {
             weiBuf.push_back(1);
             weiBuf.push_back(0);
+            weiBuf.push_back(1);
+            weiBuf.push_back(0);
         }
         else {
             weiBuf.push_back(next_bone - bone_index);
             weiBuf.push_back(bone_index - prev_bone);
+            weiBuf.push_back(next_bone - bone_index);
+            weiBuf.push_back(bone_index - prev_bone);
         }
         bonBuf.push_back(next_bone);
-        bonBuf.push_ back(prev_bone);
+        bonBuf.push_back(prev_bone);
+        bonBuf.push_back(next_bone);
+        bonBuf.push_back(prev_bone);
     }
 } 
 
@@ -204,6 +223,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
     int nverts, nbones;
     nverts = 4;
     nbones = this->num_bones;
+    cout << "nbones " << nbones << endl;
 
     
     // read first line of points and quaternions
@@ -237,13 +257,12 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             skin->addAnime(j, E);
         }
         
-    }
-    in.close();
-    
+    }    
 }
 
 void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
     // iterates all the vertices
+    cout << posBuf.size() << endl;
     for (int i = 0; i < posBuf.size()/3; ++i) {
 
         // creates clear dummy vectors
@@ -252,8 +271,8 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
         
+        cout << "starting for loop" << endl;
         // calculates skinned position and normal
-
         for (int j = 0; j < 2; ++j) {
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
@@ -269,6 +288,7 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
             glm::vec4 dum6 = weiBuf.at(2*i+j) * dum5;
             normal = normal + dum6;
         }
+        cout << "finished half skinon" << endl;
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;

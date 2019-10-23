@@ -27,7 +27,7 @@ using namespace glm;
 GLFWwindow *window; // Main application window
 string RESOURCE_DIR = ""; // Where the resources are loaded from
 int NUM_BONES = 2; // 2 bones by default
-int NUM_VERTCIES = 4;
+int NUM_VERTICES = 4;
 int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float COEFFICIENT = 0.5; // coefficient for the weight between LBS and DQS
@@ -86,7 +86,36 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
-void loadScene(const string &meshFile, const string &attachmentFile, const string &skeletonFile)
+// void loadScene(const string &meshFile, const string &attachmentFile, const string &skeletonFile)
+// {
+// 	keyToggles[(unsigned)'c'] = true;
+	
+// 	camera = make_shared<Camera>();
+	
+// 	// Single shape for all the animations.
+// 	shape = make_shared<ShapeSkin>();
+// 	shape->loadMesh(meshFile);
+
+//     shape->loadAttachment(attachmentFile, walker);
+//     // This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
+// 	shape->loadSkeleton(skeletonFile, walker);
+
+// 	// For drawing the grid, etc.
+// 	progSimple = make_shared<Program>();
+// 	progSimple->setShaderNames(RESOURCE_DIR + "simple_vert.glsl", RESOURCE_DIR + "simple_frag.glsl");
+// 	progSimple->setVerbose(true);
+	
+// 	// For skinned shape, CPU/GPU
+// 	progSkin = make_shared<Program>();
+// 	progSkin->setShaderNames(RESOURCE_DIR + "skin_vert.glsl", RESOURCE_DIR + "skin_frag.glsl");
+// 	progSkin->setVerbose(true);
+    
+//     progBonus = make_shared<Program>();
+//     progBonus->setShaderNames(RESOURCE_DIR + "bonus_vert.glsl", RESOURCE_DIR + "bonus_frag.glsl");
+//     progBonus->setVerbose(true);
+// }
+
+void loadScene()
 {
 	keyToggles[(unsigned)'c'] = true;
 	
@@ -94,11 +123,11 @@ void loadScene(const string &meshFile, const string &attachmentFile, const strin
 	
 	// Single shape for all the animations.
 	shape = make_shared<ShapeSkin>();
-	shape->loadMesh(meshFile);
+	shape->loadMesh(NUM_VERTICES, RECT_LENGTH, RECT_WIDTH);
 
-	// shape->loadAttachment(walker, NUM_BONES);
+	shape->loadAttachment(NUM_BONES, RECT_WIDTH);
 	// This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
-	shape->loadSkeleton(walker, NUM_BONES);
+	shape->loadSkeleton(walker);
 
 	// For drawing the grid, etc.
 	progSimple = make_shared<Program>();
@@ -118,11 +147,12 @@ void loadScene(const string &meshFile, const string &attachmentFile, const strin
 void init()
 {
     
-    // my skinner things
-    walker = make_shared<Skinner>(NUM_BONES);
+	// my skinner things
+	walker = make_shared<Skinner>(NUM_BONES);
 
 	// Non-OpenGL things
-	loadScene(MESH_FILE, ATTACHMENT_FILE, SKELETON_FILE);
+	// loadScene(MESH_FILE, ATTACHMENT_FILE, SKELETON_FILE);
+	loadScene();
 
 	// Set background color
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -213,8 +243,7 @@ void render()
 	P->pushMatrix();
 	camera->applyProjectionMatrix(P);
 	MV->pushMatrix();
-	camera->applyViewMatrix(MV);
-	
+	camera->applyViewMatrix(MV);	
 	// Draw grid
 	progSimple->bind();
 	glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
@@ -232,6 +261,7 @@ void render()
 		glVertex3f(x, 0, -gridSizeHalf);
 		glVertex3f(x, 0,  gridSizeHalf);
 	}
+
 	// draws lines in z direction
 	for(int i = 0; i < gridNz; ++i) {
 		float alpha = i / (gridNz - 1.0f);
@@ -239,19 +269,33 @@ void render()
 		glVertex3f(-gridSizeHalf, 0, z);
 		glVertex3f( gridSizeHalf, 0, z);
 	}
+
+	cout << "273" << endl; 
 	glEnd();
+		cout << "275" << endl;
     int timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones
         float boneScale = 0.05f; // determines the size of the bones
+					cout << "280" << endl;
+
         for (int i = 0; i < NUM_BONES; ++i) { // for 18 bones
             MV->pushMatrix();
    				  // MV->multMatrix(glm::inverse(walker->getBind(i)));
-            MV->multMatrix(walker->getAnime(timeScale, i));
+						cout << "283" << endl;
+						walker->getSize();
+						auto a = walker->getAnime(timeScale, i);
+						cout << "before" << endl;
+            MV->multMatrix(a);
+							cout << "I" << endl;
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+							cout << "miss" << endl;
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+						cout << "you" << endl;
             glLineWidth(2);
             glBegin(GL_LINES);
+							cout << "huuuuuu" << endl;
+
             glColor3f(1, 0, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(boneScale, 0, 0);
@@ -265,9 +309,9 @@ void render()
             MV->popMatrix();
         }
     }		
+		cout << "300" << endl;
 
     progSimple->unbind();
-
     
 		// Draw character
 		MV->pushMatrix();
@@ -285,6 +329,7 @@ void render()
 
 		// apply skin
 		shape->skinOn(walker, timeScale);
+		cout << "we out here" << endl;
 
 		shape->setProgram(progSkin);
 		shape->draw();
@@ -297,6 +342,7 @@ void render()
 	MV->popMatrix();
 	P->popMatrix();
 	GLSL::checkError(GET_FILE_LINE);
+	cout << "jk" << endl;
 }
 
 int main(int argc, char **argv)
@@ -305,13 +351,14 @@ int main(int argc, char **argv)
 		cout << "Usage: ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>" << endl;
 		return 0;
 	}
+
 	// RESOURCE_DIR = argv[1] + string("/");
 	RESOURCE_DIR = "../resources/";
-	NUM_BONES = argc > 1 ? atoi(argv[2]) : 2;
-	NUM_VERTICES = argc > 2 ? atoi(argv[3]) : 4;
-	RECT_WIDTH = argc > 3 ? atoi(argv[4]) : 20;
-	RECT_LENGTH = argc > 4 ? atoi(argv[5]) : 10;
-	
+	NUM_BONES = argc > 1 ? atoi(argv[1]) : 2;
+	NUM_VERTICES = argc > 2 ? atoi(argv[2]) : 4;
+	RECT_WIDTH = argc > 3 ? atoi(argv[3]) : 20;
+	RECT_LENGTH = argc > 4 ? atoi(argv[4]) : 10;
+
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);
 	// Initialize the library.
@@ -347,6 +394,7 @@ int main(int argc, char **argv)
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	// Initialize scene.
 	init();
+	cout << "Checkpoint 4" << endl;
 	// Loop until the user closes the window.
 	while(!glfwWindowShouldClose(window)) {
 		// Render scene.

@@ -33,6 +33,7 @@ public:
     int getBones() {return numBones;};
     glm::mat4 getBind(int j) {return bindPose.at(j%bindPose.size());};
     glm::mat4 getAnime(int k, int j) {k = k%boneAnimations.size(); return boneAnimations.at(k).at(j%boneAnimations.at(k).size());};
+    void getSize() {std::cout << boneAnimations.size() << " " << boneAnimations.at(0).size() << std::endl;}
     float getWei(int j, int i) {return weights.at(j%weights.size()).at(i%weights.at(j).size());};
     
     // return vectors for da skinning eq
@@ -48,9 +49,10 @@ public:
 	ShapeSkin();
 	virtual ~ShapeSkin();
 	void loadMesh(const std::string &meshName);
-    void loadMesh(const int num_vertices, const int height, const int width);
+    void loadMesh(const int num_vertices, const int length, const int width);
     // void loadAttachment(std::shared_ptr<Skinner> skin, const int num_bones);
     void loadAttachment(const int num_bones, const int width);
+    // void loadSkeleton(std::shared_ptr<Skinner> skin);
     void loadSkeleton(std::shared_ptr<Skinner> skin);
 	void setProgram(std::shared_ptr<Program> p) { prog = p; }
 	void init(bool b = false);
