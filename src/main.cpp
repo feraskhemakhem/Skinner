@@ -244,6 +244,7 @@ void render()
 	camera->applyProjectionMatrix(P);
 	MV->pushMatrix();
 	camera->applyViewMatrix(MV);	
+
 	// Draw grid
 	progSimple->bind();
 	glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
@@ -270,32 +271,21 @@ void render()
 		glVertex3f( gridSizeHalf, 0, z);
 	}
 
-	cout << "273" << endl; 
 	glEnd();
-		cout << "275" << endl;
-    int timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
+    int timeScale = (int)(t*0.5*NUM_BONES); // determines the relative speed of cheb
+		// int timeScale = 0;
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones
         float boneScale = 0.05f; // determines the size of the bones
-					cout << "280" << endl;
-
-        for (int i = 0; i < NUM_BONES; ++i) { // for 18 bones
+				// assert(NUM_BONES < 2);
+        for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
             MV->pushMatrix();
-   				  // MV->multMatrix(glm::inverse(walker->getBind(i)));
-						cout << "283" << endl;
-						walker->getSize();
-						auto a = walker->getAnime(timeScale, i);
-						cout << "before" << endl;
-            MV->multMatrix(a);
-							cout << "I" << endl;
+            MV->multMatrix(walker->getBind(i));
+            MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-							cout << "miss" << endl;
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-						cout << "you" << endl;
             glLineWidth(2);
             glBegin(GL_LINES);
-							cout << "huuuuuu" << endl;
-
             glColor3f(1, 0, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(boneScale, 0, 0);
@@ -309,7 +299,6 @@ void render()
             MV->popMatrix();
         }
     }		
-		cout << "300" << endl;
 
     progSimple->unbind();
     
@@ -325,11 +314,10 @@ void render()
 		glUniform3f(progSkin->getUniform("kd"), 0.3f, 0.3f, 0.3f); // diffused colour
 		glUniform3f(progSkin->getUniform("ks"), 0.5f, 0.5f, 0.5f); // specular colour
 		glUniform1f(progSkin->getUniform("s"), 200.0f);
-		glUniform3f(progSkin->getUniform("ka"), 0.0f, 0.3f, 1.0f); // ambient colour (rgb)
+		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
 		// apply skin
 		shape->skinOn(walker, timeScale);
-		cout << "we out here" << endl;
 
 		shape->setProgram(progSkin);
 		shape->draw();
@@ -342,7 +330,6 @@ void render()
 	MV->popMatrix();
 	P->popMatrix();
 	GLSL::checkError(GET_FILE_LINE);
-	cout << "jk" << endl;
 }
 
 int main(int argc, char **argv)
@@ -394,7 +381,6 @@ int main(int argc, char **argv)
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	// Initialize scene.
 	init();
-	cout << "Checkpoint 4" << endl;
 	// Loop until the user closes the window.
 	while(!glfwWindowShouldClose(window)) {
 		// Render scene.

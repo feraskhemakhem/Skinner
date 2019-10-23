@@ -7,7 +7,8 @@
 
 Camera::Camera() :
 	aspect(1.0f),
-	fovy((float)(45.0*M_PI/180.0)),
+	// fovy((float)(45.0*M_PI/180.0)),
+	fovy((float)(90/180.0*M_PI)),
 	znear(0.1f),
 	zfar(1000.0f),
 	rotations(0.0, 0.0),

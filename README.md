@@ -6,7 +6,7 @@ is to familiarize with the differences in LBS and DQS in 2D and their difference
 
 The project currenntly takes the following input:
 
->  ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>"
+>  ./A6 [NUM BONES] [NUM VERTICES] [RECT WIDTH] [RECT LENGTH]
 
 These inputs respond to the folder where the shaders exist, the object being skinned, attachment file, and skeleton file. This input will
 change as the inputs are changed, and as the project is developed into a unique project.

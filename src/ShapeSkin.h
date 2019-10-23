@@ -63,14 +63,15 @@ private:
     int num_bones;
     int num_vertices;
 	std::shared_ptr<Program> prog;
-	std::vector<unsigned int> elemBuf;
-	std::vector<float> posBuf;
-	std::vector<float> norBuf;
+	std::vector<unsigned int> elemBuf; // index of vertex in triangular face (2 faces, 6)
+	std::vector<float> posBuf; // x, y, z of each vert position
+	std::vector<float> norBuf; // x, y, z of each vert normal
     std::vector<float> skinnedPos;
     std::vector<float> skinnedNor;
-    std::vector<float> weiBuf;
-    std::vector<float> numInfl;
-    std::vector<float> bonBuf;
+    std::vector<float> weiBuf; // weight of bone on vertex (2 weights per vertex, num_vert * 2)
+    std::vector<float> numInfl; // num bones influencing
+    std::vector<float> bonBuf; // bone index for corresponding weight (2 weights per vertex, num_vert * 2)
+    std::vector<float> bonLoc; // location of each bone from 0 to b (#bones, one for each x of each bone)
 	unsigned elemBufID;
 	unsigned posBufID;
 	unsigned norBufID;
