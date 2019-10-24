@@ -272,8 +272,7 @@ void render()
 	}
 
 	glEnd();
-    int timeScale = (int)(t*0.5*NUM_BONES); // determines the relative speed of cheb
-		// int timeScale = 0;
+    int timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones
         float boneScale = 0.05f; // determines the size of the bones

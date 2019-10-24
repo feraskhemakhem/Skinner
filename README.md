@@ -13,7 +13,15 @@ To compile the project:
 
 The project currenntly takes the following input to run:
 
->  ./A6 [NUM BONES] [NUM VERTICES] [RECT WIDTH] [RECT LENGTH]
+`
+./A6 [NUM BONES] [NUM VERTICES] [RECT WIDTH] [RECT LENGTH]
+`
 
 These inputs respond to the folder where the shaders exist, the object being skinned, attachment file, and skeleton file. This input will
 change as the inputs are changed, and as the project is developed into a unique project.
+
+In addition, to control the camera, use the following actions:
+
+* To scale, hold cntrl + move mouse
+* To translate, hold shift + move mouse
+* To rotate, just move mouse

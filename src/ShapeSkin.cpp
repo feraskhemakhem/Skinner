@@ -271,10 +271,18 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
         skin->pushAnime();
         for (int i = 0; i < nbones; ++i) {
             // rotate 5 degree across y axis
-            q.y = cos(PI / 36) * j;
-            q.z = cos(PI / 36) * j;
+
+            //https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+            q.x = 0;
+            if (i != 0)
+                q.y = sin(PI / 36 * j);
+            else
+                q.y = 0;
             q.z = 0;
-            q.w = 0;
+            if (i != 0)
+                q.w = cos(PI / 36 * j);
+            else
+                q.w = 1;
 
             // do not move, just rotate
             p.x = 0;
@@ -304,16 +312,15 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
         for (int j = 0; j < 2; ++j) {
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
+            
             // skinned positions
-            glm::vec4 dum1 = x;
-            // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
             glm::vec4 dum2 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
             glm::vec4 dum3 = weiBuf.at(2*i+j) * dum2; // apply weight of ith vertex on jth bone
             position = position + dum3;
 
             // skinned normals
-            glm::vec4 dum4 = y;
-            // glm::vec4 dum4 = skin->getBind(bone) * y;
+            glm::vec4 dum4 = skin->getBind(bone) * y;
             glm::vec4 dum5  = skin->getAnime(k, bone) * dum4;
             glm::vec4 dum6 = weiBuf.at(2*i+j) * dum5;
             normal = normal + dum6;
