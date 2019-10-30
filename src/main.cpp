@@ -144,6 +144,10 @@ void loadScene()
     progBonus->setVerbose(true);
 }
 
+void draw_bone() { // recursive function that draws heirarchy of bones
+
+}
+
 void init()
 {
     
@@ -272,6 +276,7 @@ void render()
 	}
 
 	glEnd();
+	// int timeScale = 0;
     int timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones

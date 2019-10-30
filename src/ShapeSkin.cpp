@@ -79,7 +79,7 @@ void ShapeSkin::loadMesh(const int num_vertices, const int length, const int wid
     std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
 
     // first vertex is at -width/2, all the way to width/2
-    while (current_x <= width / 2.0) {
+    while (current_x <= (width / 2.0)) {
             // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
         // add lower vertex
         posBuf.push_back(current_x);
@@ -117,6 +117,14 @@ void ShapeSkin::loadMesh(const int num_vertices, const int length, const int wid
         elemBuf.push_back(1);
         elemBuf.push_back(posBuf.size()/3 - 1);
         elemBuf.push_back(posBuf.size()/3 - 2);
+
+        elemBuf.push_back(1);
+        elemBuf.push_back(0);
+        elemBuf.push_back(posBuf.size()/3 - 2);
+        
+        elemBuf.push_back(posBuf.size()/3 - 2);
+        elemBuf.push_back(posBuf.size()/3 - 1);
+        elemBuf.push_back(1);
 
     // no shapes to loop because no groups object names
 }
@@ -162,8 +170,9 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     assert (num_bones != 0);
     this->num_bones = num_bones;
     float dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
-    float seperation_ratio = (num_bones + 1) / (num_vertices - 1);
+    float seperation_ratio = float(num_bones + 1) / float((num_vertices/2.0) - 1);
     float bone_index, prev_bone, next_bone;
+    cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
     numInfl = std::vector<float>(this->num_vertices, 2);
 
@@ -175,19 +184,26 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         bonLoc.push_back(x_location);
     }
     cout << endl;
-
+    // float wei1, wei2, bon1, bon2;
     for (int i = 0; i < this->num_vertices/2; ++i) {
         // lower, then upper vertex
         
         // vertex location * ratio will give us the index of bone we are at
         // +1 to make up for index, and -2 because the first bone is at index 1
-        bone_index = ((i+1) * seperation_ratio) - 2;
+        bone_index = (i * seperation_ratio) - 1;
+        cout << "bone index " << bone_index << endl;
 
         // edge cases - if an invisible bone is weighted, make it unimportant
-        if (bone_index < 0) { // if using the first 2 bones
-            prev_bone = ((width * -1 / 2) + dist_seperation) - posBuf.at(3*i); // between first bone and this vertex
+        if (bone_index < 0) { // if using the first bone
+        cout << "first bone" << endl;
+            prev_bone = ((width * -1 / 2.0) + dist_seperation) - posBuf.at(3*i); // between first bone and this vertex
             next_bone = prev_bone + dist_seperation;
             float total = prev_bone + next_bone;
+            // wei1 = prev_bone/total;  // past the first bone, so first bone has total control
+            // wei2 = next_bone/total; // second bone does not even matter
+            // bon1 = 0;
+            // bon2 = 1;
+            cout << "prev_bone/total " << prev_bone/total << " next_bone/total " << next_bone/total << endl;
             weiBuf.push_back(prev_bone/total); // ratio wrt distance
             weiBuf.push_back(next_bone/total); // "
             bonBuf.push_back(0);
@@ -196,43 +212,73 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             weiBuf.push_back(next_bone/total); // "
             bonBuf.push_back(0);
             bonBuf.push_back(1);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(0);
+            // bonBuf.push_back(1);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(0);
+            // bonBuf.push_back(1);
             continue;
         }
         else if (bone_index > num_bones-1) { // if using the last 2 bones
-            next_bone = posBuf.at(3*i) - ((width / 2) - dist_seperation); // between first bone and this vertex
-            prev_bone = next_bone + dist_seperation; // double negative in the line above makes it a +
+        cout << "last bone" <<endl; 
+            next_bone = posBuf.at(3*i) - ((width / 2.0) - dist_seperation); // between last bone and this vertex
+            prev_bone = next_bone - dist_seperation; // double negative in the line above makes it a +
             float total = prev_bone + next_bone;
+            // wei1 = prev_bone/total;
+            // wei2 = next_bone/total;
+            // bon1 = num_bones-1;
+            // bon2 = num_bones-2;
             weiBuf.push_back(prev_bone/total); // ratio wrt distance
             weiBuf.push_back(next_bone/total); // "
-            bonBuf.push_back(0);
-            bonBuf.push_back(1);
+            bonBuf.push_back(num_bones-2);
+            bonBuf.push_back(num_bones-1);
             weiBuf.push_back(prev_bone/total); // ratio wrt distance
             weiBuf.push_back(next_bone/total); // "
-            bonBuf.push_back(0);
-            bonBuf.push_back(1);
+            //          bonBuf.push_back(0);
+            // bonBuf.push_back(1);
+            bonBuf.push_back(num_bones-2);
+            bonBuf.push_back(num_bones-1);
             continue;
         }
+        else 
+        {
+            prev_bone = floor(bone_index);
+            next_bone = ceil(bone_index);
 
-        prev_bone = floor(bone_index);
-        next_bone = ceil(bone_index);
+            // if the two bones are the same, give a weight of 1
+            if ((prev_bone - next_bone) < 0.001) {
+                // wei1 = 1;
+                // wei2 = 0;
+                weiBuf.push_back(1);
+                weiBuf.push_back(0);
+                weiBuf.push_back(1);
+                weiBuf.push_back(0);
+            }
+            else {
+                // wei1 = next_bone - bone_index;
+                // wei2 = bone_index - prev_bone;
+                weiBuf.push_back(next_bone - bone_index);
+                weiBuf.push_back(bone_index - prev_bone);
+                weiBuf.push_back(next_bone - bone_index);
+                weiBuf.push_back(bone_index - prev_bone);
+            }
+            bonBuf.push_back(next_bone);
+            bonBuf.push_back(prev_bone);
+            bonBuf.push_back(next_bone);
+            bonBuf.push_back(prev_bone);
+            // bon1 = next_bone;
+            // bon2 = prev_bone;
+        }
 
-        // if the two bones are the same, give a weight of 1
-        if ((prev_bone - next_bone) < 0.001) {
-            weiBuf.push_back(1);
-            weiBuf.push_back(0);
-            weiBuf.push_back(1);
-            weiBuf.push_back(0);
-        }
-        else {
-            weiBuf.push_back(next_bone - bone_index);
-            weiBuf.push_back(bone_index - prev_bone);
-            weiBuf.push_back(next_bone - bone_index);
-            weiBuf.push_back(bone_index - prev_bone);
-        }
-        bonBuf.push_back(next_bone);
-        bonBuf.push_back(prev_bone);
-        bonBuf.push_back(next_bone);
-        bonBuf.push_back(prev_bone);
+        // for (int a = 0; a < 2; ++a) {
+        //     weiBuf.push_back(wei1);
+        //     weiBuf.push_back(wei2);
+        //     bonBuf.push_back(bon1);
+        //     bonBuf.push_back(bon2);
+        // }
     }
 } 
 
@@ -273,16 +319,20 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             // rotate 5 degree across y axis
 
             //https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+            // if (i == 1)
+                // float norm = sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
             q.x = 0;
-            if (i != 0)
+            // if (i == 1)
                 q.y = sin(PI / 36 * j);
-            else
-                q.y = 0;
+            // else
+                // q.y = 0;
             q.z = 0;
-            if (i != 0)
+            // if (i == 1)
                 q.w = cos(PI / 36 * j);
-            else
-                q.w = 1;
+            // else
+                // q.w = 1;
+            q = normalize(q);
+
 
             // do not move, just rotate
             p.x = 0;
@@ -327,6 +377,13 @@ void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
         }
         
         // adjusts values of position and normal respectively
+        // skinnedPos.at(3*i) = x.x;
+        // skinnedPos.at(3*i+1) = x.y;
+        // skinnedPos.at(3*i+2) = x.z;
+        
+        // skinnedNor.at(3*i) = y.x;
+        // skinnedNor.at(3*i+1) = y.y;
+        // skinnedNor.at(3*i+2) = y.z;
         skinnedPos.at(3*i) = position.x;
         skinnedPos.at(3*i+1) = position.y;
         skinnedPos.at(3*i+2) = position.z;
