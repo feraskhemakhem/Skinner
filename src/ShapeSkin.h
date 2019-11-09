@@ -32,7 +32,7 @@ public:
     // get specific element
     int getBones() {return numBones;};
     glm::mat4 getBind(int j) {return bindPose.at(j%bindPose.size());};
-    glm::mat4 getAnime(int k, int j) {k = k%boneAnimations.size(); return boneAnimations.at(k).at(j%boneAnimations.at(k).size());};
+    glm::mat4 getAnime(int k, int j) {if (k >= boneAnimations.size()) {k = boneAnimations.size()-1;} return boneAnimations.at(k).at(j%boneAnimations.at(k).size());};
     void getSize() {std::cout << boneAnimations.size() << " " << boneAnimations.at(0).size() << std::endl;}
     float getWei(int j, int i) {return weights.at(j%weights.size()).at(i%weights.at(j).size());};
     
@@ -57,11 +57,17 @@ public:
 	void setProgram(std::shared_ptr<Program> p) { prog = p; }
 	void init(bool b = false);
 	void draw(bool b = false);
-    void skinOn(std::shared_ptr<Skinner> skin, int k);
+    void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
+    void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
+
+    // helpers 
+    glm::vec4 DQS(std::shared_ptr<Skinner> skin, int vertex);
+    // glm::vec4 LBS(std::shared_ptr<Skinner> skin, int vertex);
 	
 private:
     int num_bones;
     int num_vertices;
+    float dist_seperation;
 	std::shared_ptr<Program> prog;
 	std::vector<unsigned int> elemBuf; // index of vertex in triangular face (2 faces, 6)
 	std::vector<float> posBuf; // x, y, z of each vert position
@@ -78,6 +84,10 @@ private:
 	unsigned weiBufID;
     unsigned influID;
     unsigned bonBufID;
+
+    // DQS
+    std::vector<glm::quat> translations;
+    std::vector<glm::quat> rotations;
 };
 
 #endif
