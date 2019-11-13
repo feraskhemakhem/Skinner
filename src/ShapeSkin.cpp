@@ -72,14 +72,16 @@ void ShapeSkin::loadMesh(const string &meshName)
 
 void ShapeSkin::loadMesh(const int num_vertices, const int length, const int width) {
     // determine how much to seperate each vertex, and the set points
-    float dist_seperation = width / ((num_vertices / 2.0) - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
+    float dist_seperation = (float)width / ((num_vertices / 2) - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
     float current_x = -1 * width / 2.0;
     this->num_vertices = num_vertices;
 
     std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
 
     // first vertex is at -width/2, all the way to width/2
-    while (current_x <= (width / 2.0)) {
+    cout << dist_seperation << " is distance between each vertex" << endl;
+    cout << "vertices at "; 
+    while ((current_x - ((float)width / 2)) <= 0.001) {
             // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
         // add lower vertex
         posBuf.push_back(current_x);
@@ -100,9 +102,11 @@ void ShapeSkin::loadMesh(const int num_vertices, const int length, const int wid
         norBuf.push_back(current_x);
         norBuf.push_back(1);
         norBuf.push_back(length / 2.0);
+        cout << current_x << " ";
 
         current_x += dist_seperation;
     }
+    cout << endl;
 
     skinnedPos = posBuf;
     skinnedNor = norBuf;
@@ -169,21 +173,21 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     assert (num_bones != 0);
     this->num_bones = num_bones;
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
-    float seperation_ratio = float(num_bones + 1) / float((num_vertices/2.0) - 1);
+    float seperation_ratio = float(num_bones + 1) / float((num_vertices/2) - 1);
     float bone_index, prev_bone, next_bone;
     cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
     numInfl = std::vector<float>(this->num_vertices, 2);
 
     float x_location = -1 * width / 2.0;
-    cout << "bones at ";
+    // cout << "bones at ";
     for (int i = 0; i < num_bones; ++i) {
         x_location += dist_seperation;
-        cout << x_location << '\t';
+        // cout << x_location << '\t';
         bonLoc.push_back(x_location);
     }
-    bonLoc.push_back(dist_seperation); //TESTING WITH ILLEGAL VALUE DONT MIND ME
-    cout << endl;
+    bonLoc.push_back(dist_seperation); //FIXME: TESTING WITH ILLEGAL VALUE DONT MIND ME
+    // cout << endl;
     for (int i = 0; i < this->num_vertices/2; ++i) {
         // lower, then upper vertex
         
@@ -191,22 +195,18 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
         cout << "bone index " << bone_index << endl;
+        // weiBuf.push_back(1);
+        // weiBuf.push_back(0);
+        // weiBuf.push_back(1);
+        // weiBuf.push_back(0);
+        // bonBuf.push_back(1);
+        // bonBuf.push_back(0);            
+        // bonBuf.push_back(1);
+        // bonBuf.push_back(0);
 
         // edge cases - if an invisible bone is weighted, make it unimportant
         if (bone_index < 0) { // if using the first bone
-        cout << "first bone" << endl;
-            prev_bone = ((width * -1 / 2.0) + dist_seperation) - posBuf.at(3*i); // between first bone and this vertex
-            next_bone = prev_bone + dist_seperation;
-            float total = prev_bone + next_bone;
-            cout << "prev_bone/total " << prev_bone/total << " next_bone/total " << next_bone/total << endl;
-            // weiBuf.push_back(prev_bone/total); // ratio wrt distance
-            // weiBuf.push_back(next_bone/total); // "
-            // bonBuf.push_back(0);
-            // bonBuf.push_back(1);
-            // weiBuf.push_back(prev_bone/total); // ratio wrt distance
-            // weiBuf.push_back(next_bone/total); // "
-            // bonBuf.push_back(0);
-            // bonBuf.push_back(1);
+        // cout << "first bone" << endl;
             weiBuf.push_back(1); // ratio wrt distance
             weiBuf.push_back(0); // "
             bonBuf.push_back(0);
@@ -215,21 +215,9 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             weiBuf.push_back(0); // "
             bonBuf.push_back(0);
             bonBuf.push_back(1);
-            continue;
         }
         else if (bone_index > num_bones-1) { // if using the last 2 bones
-        cout << "last bone" <<endl; 
-            next_bone = posBuf.at(3*i) - ((width / 2.0) - dist_seperation); // between last bone and this vertex
-            prev_bone = next_bone - dist_seperation; // double negative in the line above makes it a +
-            float total = prev_bone + next_bone;
-            // weiBuf.push_back(prev_bone/total); // ratio wrt distance
-            // weiBuf.push_back(next_bone/total); // "
-            // bonBuf.push_back(num_bones-2);
-            // bonBuf.push_back(num_bones-1);
-            // weiBuf.push_back(prev_bone/total); // ratio wrt distance
-            // weiBuf.push_back(next_bone/total); // "
-            // bonBuf.push_back(num_bones-2);
-            // bonBuf.push_back(num_bones-1);
+        // cout << "last bone" <<endl;
             weiBuf.push_back(1); // ratio wrt distance
             weiBuf.push_back(0); // "
             bonBuf.push_back(num_bones-1);
@@ -238,39 +226,43 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             weiBuf.push_back(0); // "
             bonBuf.push_back(num_bones-1);
             bonBuf.push_back(num_bones-2);
-            continue;
         }
         else 
         {
+            // cout << bone_index << " is bone index\t";
             prev_bone = floor(bone_index);
             next_bone = ceil(bone_index);
 
             // if the two bones are the same, give a weight of 1
-            if ((prev_bone - next_bone) < 0.001) {
+            if ((next_bone - prev_bone) < 0.001) {
                 weiBuf.push_back(1);
                 weiBuf.push_back(0);
                 weiBuf.push_back(1);
                 weiBuf.push_back(0);
+                // cout << "ok\t" << endl;
             }
             else {
                 weiBuf.push_back(next_bone - bone_index);
                 weiBuf.push_back(bone_index - prev_bone);
                 weiBuf.push_back(next_bone - bone_index);
                 weiBuf.push_back(bone_index - prev_bone);
+                cout << next_bone - bone_index << " ";
+                // cout << "nah\t";
             }
             bonBuf.push_back(next_bone);
             bonBuf.push_back(prev_bone);
             bonBuf.push_back(next_bone);
             bonBuf.push_back(prev_bone);
         }
+        cout << prev_bone << " " << next_bone << endl;
+
     }
 } 
 
 // this is the animation that the vertices do, in x y z format
 void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 {
-    int nverts, nbones;
-    nverts = 4;
+    int nbones;
     nbones = this->num_bones;
     // assert(bonLoc.size() == nbones);
 
@@ -307,18 +299,22 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 
             //https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
             q.x = 0;
-            if (i == 0) {
-                q.y = sin(PI / 144 * j);
-                q.w = cos(PI / 144 * j);
-            }
-            else if (i%2 == 0) {
-                q.y = sin(PI / 72 * j);
-                q.w = cos(PI / 72 * j);
-            }
-            else {
-                q.y = -1*sin(PI / 72 * j);
-                q.w = cos(PI / 72 * j);
-            }
+            // if (i == nbones-1) { // last bone
+            //     q.y = 0;
+            //     q.w = 1;
+            // }
+            // else if (i == 0) {
+            //     q.y = sin(PI / 144 * j);
+            //     q.w = cos(PI / 144 * j);
+            // }
+            // else if (i%2 == 0) {
+            //     q.y = sin(PI / 72 * j);
+            //     q.w = cos(PI / 72 * j);
+            // }
+            // else {
+            //     q.y = -1*sin(PI / 72 * j);
+            //     q.w = cos(PI / 72 * j);
+            // }
             // if (i == 0) {
             //     q.y = sin(PI / 8);
             //     q.w = cos(PI / 8);
@@ -332,9 +328,13 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             //     q.w = cos(PI / 4);
             // }
             q.z = 0;
+            q.y = 0;
+            q.w = 1;
 
             q = normalize(q);
             
+            E = mat4_cast(q); // converting each 7-tuple to one 4x4 trans matrix
+
             // add rotation quaternion to vector with heirarchy
             if (i != 0)
                 q = normalize(rotations.at(i-1) * q);
@@ -342,17 +342,17 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 
 
             // do not move, just rotate
-            if (i == 0)
-                p.x = bonLoc.at(0);
-            else
-                p.x = dist_seperation;
-            p.y = 0;
-            // if (i == 2)
-                // p.z = j;
+            p.x = bonLoc.at(i);
+            // if (i == 0)
+            //     p.x = bonLoc.at(0);
             // else
+                // p.x = dist_seperation;
+            p.y = 0;
+            if (i == 1)
+                p.z = -1.0*j/2;
+            else
                 p.z = 0;
             
-            E = mat4_cast(q); // converting each 7-tuple to one 4x4 trans matrix
             E[3] = glm::vec4(p, 1.0f);
             skin->addAnime(j, E);
         }
@@ -374,46 +374,65 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
+        bool idk = false;
 
         // creates clear dummy vectors
         glm::vec4 position;
         glm::vec4 normal;
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
-        // glm::mat4 howdy = glm::mat4(1.0);
 
         
         // calculates skinned position and normal
         for (int j = 0; j < 2; ++j) {
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
-            
-            // howdy = howdy * skin->getAnime(k, bone);
+            if (bone > 2) {
+                cout << "BONE TOO BIG" << endl;
+            }
 
-            glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-            // dum1 = howdy * dum1; // inverse bind matrix * initial vertex
-            dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+            // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            // // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
             // dum1 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
-            dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
-            position = position + dum1;
+            // dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
+            // position = position + dum1;
+
+            // // skinned normals
+            // glm::vec4 dum2 = skin->getBind(bone) * y;
+            // dum2  = skin->getAnime(k, bone) * dum2;
+            // // dum2 = howdy.at(bone) * dum2;
+            // dum2 = weiBuf.at(2*i+j) * dum2;
+            // normal = normal + dum2;
+
+            glm::vec4 dum1 = skin->getBind(bone) * x;
+            glm::vec4 dum2 = skin->getAnime(k, bone) * dum1;
+            glm::vec4 dum3 = weiBuf.at(2*i+j) * dum2;
+            position = position + dum3;
+
+            if (weiBuf.at(2*i+j) == 1 && bone == 1 && i%2 == 0 && position.z != -1) {
+                idk = true;
+            }
 
             // skinned normals
-            glm::vec4 dum2 = skin->getBind(bone) * y;
-            // dum2  = skin->getAnime(k, bone) * dum2;
-            // dum2 = howdy * dum2;
-            dum2 = howdy.at(bone) * dum2;
-            dum2 = weiBuf.at(2*i+j) * dum2;
-            normal = normal + dum2;
+            // glm::vec4 dum4 = y;
+            glm::vec4 dum4 = skin->getBind(bone) * y;
+            glm::vec4 dum5  = skin->getAnime(k, bone) * dum4;
+            glm::vec4 dum6 = weiBuf.at(2*i+j) * dum5;
+            normal = normal + dum6;
         }
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;
         skinnedPos.at(3*i+1) = position.y;
         skinnedPos.at(3*i+2) = position.z;
+        if (idk) {
+            cout << skinnedPos.at(3*i+2) << endl;
+        }
         
         skinnedNor.at(3*i) = normal.x;
         skinnedNor.at(3*i+1) = normal.y;
         skinnedNor.at(3*i+2) = normal.z;
+        idk = false;
     }
 }
 
@@ -422,42 +441,7 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 // }
 
 void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
-    // heirarchy applied to bones
-    // move_bones(k);
-    assert(num_bones != 0);
-    vector<glm::mat4> howdy;
-    howdy.push_back(skin->getAnime(k, 0));
-    for (int i = 1; i < num_bones; ++i) {
-        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
-    }
 
-    // iterates all the vertices
-    for (int i = 0; i < posBuf.size()/3; ++i) {
-
-        // creates clear dummy vectors
-        glm::vec4 position;
-        glm::vec4 normal;
-        glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
-        glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
-        // glm::mat4 howdy = glm::mat4(1.0);
-
-        
-        // calculates skinned position and normal
-        for (int j = 0; j < 2; ++j) {
-            // i is vertex, j is bone, k is time
-            int bone = bonBuf.at(2*i+j);
-                        
-        }
-        
-        // adjusts values of position and normal respectively
-        skinnedPos.at(3*i) = position.x;
-        skinnedPos.at(3*i+1) = position.y;
-        skinnedPos.at(3*i+2) = position.z;
-        
-        skinnedNor.at(3*i) = normal.x;
-        skinnedNor.at(3*i+1) = normal.y;
-        skinnedNor.at(3*i+2) = normal.z;
-    }
 }
 
 void ShapeSkin::init(bool b)

@@ -308,7 +308,7 @@ void render()
 	if (!TS)
 		timeScale = 0;
 	else
-    timeScale = (int)(t*2*NUM_BONES); // determines the relative speed of cheb
+    timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones
         float boneScale = 0.05f; // determines the size of the bones
@@ -318,9 +318,9 @@ void render()
 
         for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
             MV->pushMatrix();
-						howdy = howdy * walker->getAnime(timeScale, i);
-            // MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
-						MV->multMatrix(howdy);
+						// howdy = howdy * walker->getAnime(timeScale, i);
+            MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
+						// MV->multMatrix(howdy);
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
             glLineWidth(2);
@@ -377,10 +377,10 @@ void render()
 
 int main(int argc, char **argv)
 {
-	if(argc < 5) {
-		cout << "Usage: ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>" << endl;
-		return 0;
-	}
+	// if(argc < 5) {
+	// 	cout << "Usage: ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>" << endl;
+	// 	return 0;
+	// }
 
 	// RESOURCE_DIR = argv[1] + string("/");
 	RESOURCE_DIR = "../resources/";
@@ -388,6 +388,18 @@ int main(int argc, char **argv)
 	NUM_VERTICES = argc > 2 ? atoi(argv[2]) : 4;
 	RECT_WIDTH = argc > 3 ? atoi(argv[3]) : 20;
 	RECT_LENGTH = argc > 4 ? atoi(argv[4]) : 10;
+	TS = argc > 5 ? (string(argv[5]) == "T" ? true : false) : false;
+
+	// if vertex count is odd, round up to make even
+	if (NUM_VERTICES%2 == 1) {
+		NUM_VERTICES++;
+	}
+
+	// error checking: asserts to make sure valid input
+	assert (NUM_BONES > 1); // more than 1 bone
+	assert (NUM_VERTICES%2 == 0); // even # vertices
+	assert (RECT_WIDTH > 0); // positive width
+	assert (RECT_LENGTH > 0); // positive length
 
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);
