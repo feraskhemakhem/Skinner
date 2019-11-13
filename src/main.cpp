@@ -141,9 +141,9 @@ void loadScene()
 	progSkin->setShaderNames(RESOURCE_DIR + "skin_vert.glsl", RESOURCE_DIR + "skin_frag.glsl");
 	progSkin->setVerbose(true);
     
-    progBonus = make_shared<Program>();
-    progBonus->setShaderNames(RESOURCE_DIR + "bonus_vert.glsl", RESOURCE_DIR + "bonus_frag.glsl");
-    progBonus->setVerbose(true);
+	progBonus = make_shared<Program>();
+	progBonus->setShaderNames(RESOURCE_DIR + "bonus_vert.glsl", RESOURCE_DIR + "bonus_frag.glsl");
+	progBonus->setVerbose(true);
 }
 
 // recursive function that draws heirarchy of bones
@@ -306,7 +306,7 @@ void render()
 	glEnd();
 	int timeScale;
 	if (!TS)
-		timeScale = 0;
+		timeScale = 4;
 	else
     timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
@@ -357,10 +357,11 @@ void render()
 		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
 		// apply skin
-		if (LBS)
-			shape->LBSskinOn(walker, timeScale);
-		else
-			shape->DQSskinOn(walker, timeScale);
+		shape->skinOn(walker, timeScale);
+		// if (LBS)
+		// 	shape->LBSskinOn(walker, timeScale);
+		// else
+		// 	shape->DQSskinOn(walker, timeScale);
 
 		shape->setProgram(progSkin);
 		shape->draw();

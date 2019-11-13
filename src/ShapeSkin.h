@@ -58,6 +58,7 @@ public:
 	void init(bool b = false);
 	void draw(bool b = false);
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
+    void skinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
 
     // helpers 

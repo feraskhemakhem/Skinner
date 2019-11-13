@@ -361,6 +361,82 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
     }    
 }
 
+
+void ShapeSkin::skinOn (std::shared_ptr<Skinner> skin, int k) {
+
+    // heirarchy applied to bones
+    // move_bones(k);
+    assert(num_bones != 0);
+    vector<glm::mat4> howdy;
+    howdy.push_back(skin->getAnime(k, 0));
+    for (int i = 1; i < num_bones; ++i) {
+        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+    }
+
+    // iterates all the vertices
+    for (int i = 0; i < posBuf.size()/3; ++i) {
+        bool idk = false;
+
+        // creates clear dummy vectors
+        glm::vec4 position;
+        glm::vec4 normal;
+        glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
+        glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
+
+        
+        // calculates skinned position and normal
+        for (int j = 0; j < 2; ++j) {
+            // i is vertex, j is bone, k is time
+            int bone = bonBuf.at(2*i+j);
+            if (bone > 2) {
+                cout << "BONE TOO BIG" << endl;
+            }
+
+            // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            // // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+            // dum1 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
+            // dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
+            // position = position + dum1;
+
+            // // skinned normals
+            // glm::vec4 dum2 = skin->getBind(bone) * y;
+            // dum2  = skin->getAnime(k, bone) * dum2;
+            // // dum2 = howdy.at(bone) * dum2;
+            // dum2 = weiBuf.at(2*i+j) * dum2;
+            // normal = normal + dum2;
+
+            glm::vec4 dum1 = skin->getBind(bone) * x;
+            glm::vec4 dum2 = skin->getAnime(k, bone) * dum1;
+            glm::vec4 dum3 = weiBuf.at(2*i+j) * dum2;
+            position = position + dum3;
+
+            if (weiBuf.at(2*i+j) == 1 && bone == 1 && i%2 == 0 && position.z != -1) {
+                idk = true;
+            }
+
+            // skinned normals
+            // glm::vec4 dum4 = y;
+            glm::vec4 dum4 = skin->getBind(bone) * y;
+            glm::vec4 dum5  = skin->getAnime(k, bone) * dum4;
+            glm::vec4 dum6 = weiBuf.at(2*i+j) * dum5;
+            normal = normal + dum6;
+        }
+        
+        // adjusts values of position and normal respectively
+        skinnedPos.at(3*i) = position.x;
+        skinnedPos.at(3*i+1) = position.y;
+        skinnedPos.at(3*i+2) = position.z;
+        // if (skinnedPos.at(3*i+2) != -1 && skinnedPos.at(3*i+2) != 1) {
+        //     cout << i << endl;
+        // }
+        
+        skinnedNor.at(3*i) = normal.x;
+        skinnedNor.at(3*i+1) = normal.y;
+        skinnedNor.at(3*i+2) = normal.z;
+        idk = false;
+    }
+}
+
 void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
     // heirarchy applied to bones
@@ -425,9 +501,9 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
         skinnedPos.at(3*i) = position.x;
         skinnedPos.at(3*i+1) = position.y;
         skinnedPos.at(3*i+2) = position.z;
-        if (idk) {
-            cout << skinnedPos.at(3*i+2) << endl;
-        }
+        // if (skinnedPos.at(3*i+2) != -1 && skinnedPos.at(3*i+2) != 1) {
+        //     cout << i << endl;
+        // }
         
         skinnedNor.at(3*i) = normal.x;
         skinnedNor.at(3*i+1) = normal.y;
@@ -494,7 +570,7 @@ void ShapeSkin::draw(bool b)
         glGenBuffers(1, &posBufID);
         glBindBuffer(GL_ARRAY_BUFFER, posBufID);
         glBufferData(GL_ARRAY_BUFFER, skinnedPos.size()*sizeof(float), &skinnedPos[0], GL_STATIC_DRAW);
-        
+        cout<< skinnedPos.at(3*8+2) << endl;
         // Send the normal array to the GPU
         glGenBuffers(1, &norBufID);
         glBindBuffer(GL_ARRAY_BUFFER, norBufID);
