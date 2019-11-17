@@ -308,11 +308,11 @@ void render()
 	if (!TS)
 		timeScale = 0;
 	else
-		timeScale = 420;
-    // timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
+		// timeScale = 420;
+    timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
-        // drawing bones
-        float boneScale = 0.05f; // determines the size of the bones
+        // dra	ng bones
+        float boneScale = 0.25f; // determines the size of the bones
 				assert(NUM_BONES > 0);
 				// draw_bone(0, boneScale, timeScale, MV, P);	
 	  		mat4 howdy = mat4(1.0);
@@ -326,13 +326,13 @@ void render()
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
             glLineWidth(2);
             glBegin(GL_LINES);
-            glColor3f(3, 0, 0);
+            glColor3f(1, 0, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(boneScale, 0, 0);
-            glColor3f(0, 3, 0);
+            glColor3f(0, 1, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(0, boneScale, 0);
-            glColor3f(0, 0, 3);
+            glColor3f(0, 0, 1);
             glVertex3f(0, 0, 0);
             glVertex3f(0, 0, boneScale);
             glEnd();

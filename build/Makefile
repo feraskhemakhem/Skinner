@@ -330,33 +330,6 @@ src/ShapeSkin.cpp.s:
 	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/ShapeSkin.cpp.s
 .PHONY : src/ShapeSkin.cpp.s
 
-src/dqconv.o: src/dqconv.cpp.o
-
-.PHONY : src/dqconv.o
-
-# target to build an object file
-src/dqconv.cpp.o:
-	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.o
-.PHONY : src/dqconv.cpp.o
-
-src/dqconv.i: src/dqconv.cpp.i
-
-.PHONY : src/dqconv.i
-
-# target to preprocess a source file
-src/dqconv.cpp.i:
-	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.i
-.PHONY : src/dqconv.cpp.i
-
-src/dqconv.s: src/dqconv.cpp.s
-
-.PHONY : src/dqconv.s
-
-# target to generate assembly for a file
-src/dqconv.cpp.s:
-	$(MAKE) -f CMakeFiles/A6.dir/build.make CMakeFiles/A6.dir/src/dqconv.cpp.s
-.PHONY : src/dqconv.cpp.s
-
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -414,9 +387,6 @@ help:
 	@echo "... src/ShapeSkin.o"
 	@echo "... src/ShapeSkin.i"
 	@echo "... src/ShapeSkin.s"
-	@echo "... src/dqconv.o"
-	@echo "... src/dqconv.i"
-	@echo "... src/dqconv.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

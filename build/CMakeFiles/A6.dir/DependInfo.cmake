@@ -9,7 +9,6 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/feraskhemakhem/Desktop/Research/Skinner/src/MatrixStack.cpp" "/Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/A6.dir/src/MatrixStack.cpp.o"
   "/Users/feraskhemakhem/Desktop/Research/Skinner/src/Program.cpp" "/Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/A6.dir/src/Program.cpp.o"
   "/Users/feraskhemakhem/Desktop/Research/Skinner/src/ShapeSkin.cpp" "/Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/A6.dir/src/ShapeSkin.cpp.o"
-  "/Users/feraskhemakhem/Desktop/Research/Skinner/src/dqconv.cpp" "/Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/A6.dir/src/dqconv.cpp.o"
   "/Users/feraskhemakhem/Desktop/Research/Skinner/src/main.cpp" "/Users/feraskhemakhem/Desktop/Research/Skinner/build/CMakeFiles/A6.dir/src/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "Clang")

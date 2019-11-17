@@ -323,8 +323,6 @@ CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libr
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/vec4.hpp
 CMakeFiles/A6.dir/src/ShapeSkin.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/vector_relational.hpp
 
-CMakeFiles/A6.dir/src/dqconv.cpp.o: ../src/dqconv.cpp
-
 CMakeFiles/A6.dir/src/main.cpp.o: ../src/Camera.h
 CMakeFiles/A6.dir/src/main.cpp.o: ../src/GLSL.h
 CMakeFiles/A6.dir/src/main.cpp.o: ../src/MatrixStack.h

@@ -60,9 +60,7 @@ public:
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
 
-    // helpers 
-    glm::vec4 DQS(std::shared_ptr<Skinner> skin, int vertex);
-    // glm::vec4 LBS(std::shared_ptr<Skinner> skin, int vertex);
+
 	
 private:
     int num_bones;
@@ -87,8 +85,15 @@ private:
 
     // DQS
     std::vector<glm::quat> rotations;
-    std::vector<glm::quat> dq;
-    std::vector<glm::quat> dq_conjucate;
+    std::vector<glm::quat> dq_real;
+    std::vector<glm::quat> dq_dual;
+    std::vector<glm::quat> dq_conjugate_real;
+    std::vector<glm::quat> dq_conjugate_dual;
+    
+    // helpers 
+    // glm::vec4 DQS(std::shared_ptr<Skinner> skin, int vertex);
+    // glm::vec4 LBS(std::shared_ptr<Skinner> skin, int vertex);
+    void QuatTrans2UDQ(const float q0[4], const float t[3], float dq[2][4]);
 };
 
 #endif

@@ -15,6 +15,8 @@
 #include "GLSL.h"
 #include "Program.h"
 
+bool WIREFRAME = true;
+
 using namespace std;
 
 ShapeSkin::ShapeSkin() :
@@ -82,7 +84,6 @@ void ShapeSkin::loadMesh(const int num_vertices, const int length, const int wid
     cout << dist_seperation << " is distance between each vertex" << endl;
     cout << "vertices at "; 
     while ((current_x - ((float)width / 2)) <= 0.001) {
-            // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
         // add lower vertex
         posBuf.push_back(current_x);
         posBuf.push_back(0);
@@ -112,16 +113,57 @@ void ShapeSkin::loadMesh(const int num_vertices, const int length, const int wid
     skinnedNor = norBuf;
     assert(posBuf.size() == norBuf.size());
 
+    // TRIANGLES START
+
     // add vertices that make up a face (first and last 2 vertices)
-    for (int i = 0; i < posBuf.size()/3 - 2; ++i) {
-        elemBuf.push_back(i);
-        elemBuf.push_back(i+1);
-        elemBuf.push_back(i+2);
-     
-        elemBuf.push_back(i+2);
-        elemBuf.push_back(i+1);        
-        elemBuf.push_back(i);    
+    if (WIREFRAME) {
+
+        for (int i = 0; i < posBuf.size()/3 - 2; ++i) {
+            elemBuf.push_back(i);
+            elemBuf.push_back(i+2);
+            
+            elemBuf.push_back(i+2);        
+            elemBuf.push_back(i);      
+        }
+
+        for (int i = 0; i < posBuf.size()/3 - 1; ++i) {
+            elemBuf.push_back(i+1);        
+            elemBuf.push_back(i); 
+
+            elemBuf.push_back(i);        
+            elemBuf.push_back(i+1); 
+        }
     }
+    else {
+        for (int i = 0; i < posBuf.size()/3 - 2; ++i) {
+            elemBuf.push_back(i);
+            elemBuf.push_back(i+1);
+            elemBuf.push_back(i+2);
+
+            elemBuf.push_back(i+2);
+            elemBuf.push_back(i+1);        
+            elemBuf.push_back(i);    
+        }
+    }
+
+    // for (int i = 0; i < posBuf.size()/3 -3; i+=2) {
+    //     // elemBuf.push_back(i);
+    //     // elemBuf.push_back(i+2);
+    //     // elemBuf.push_back(i+3);
+     
+    //     // elemBuf.push_back(i+3);
+    //     // elemBuf.push_back(i+2);        
+    //     // elemBuf.push_back(i);   
+
+    //     // elemBuf.push_back(i+3); 
+    //     // elemBuf.push_back(i+2);
+    //     // elemBuf.push_back(i);
+
+    //     // elemBuf.push_back(i); 
+    //     // elemBuf.push_back(i+2);
+    //     // elemBuf.push_back(i+3);
+
+    // }
 
 
     // size 8
@@ -199,6 +241,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         x_location += dist_seperation;
         // cout << x_location << '\t';
         bonLoc.push_back(x_location);
+        cout << "x_location " << x_location << endl;
     }
     bonLoc.push_back(dist_seperation); //FIXME: TESTING WITH ILLEGAL VALUE DONT MIND ME
     // cout << endl;
@@ -285,10 +328,11 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
         q.w = 1;
 
         // do not move, just rotate
-        if (i==0)
-            p.x = bonLoc.at(i);
-        else
-            p.x = bonLoc.at(bonLoc.size()-1);
+        p.x = bonLoc.at(i);
+        // if (i==0)
+        //     p.x = bonLoc.at(i);
+        // else
+        //     p.x = bonLoc.at(bonLoc.size()-1);
         p.y = 0;
         p.z = 0;
             
@@ -336,32 +380,42 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             // do not move, just rotate
             // p.x = bonLoc.at(i);
             if (i == 0)
-                p.x = bonLoc.at(0);
+                p.x = bonLoc.at(i);
             else
                 p.x = dist_seperation;
             p.y = 0;
-            // if (i == 1)
-            //     p.z = -1.0*j/2;
-            // else
-                p.z = 0;
+            p.z = 0;
 
-            // create translational quaternion for DQS
-            // http://simonstechblog.blogspot.com/2011/11/dual-quaternion.html
-            q.w = 1;
-            q.x = p.x / 2;
-            q.y = p.y / 2;
-            q.z = p.z / 2;
+            // // create translational quaternion for DQS
+            // // http://simonstechblog.blogspot.com/2011/11/dual-quaternion.html
+            // q.w = 1;
+            // q.x = p.x / 2;
+            // q.y = p.y / 2;
+            // q.z = p.z / 2;
 
-            q = normalize(q);
+            // q = normalize(q);
 
-            // http://web.cs.iastate.edu/~cs577/handouts/dual-quaternion.pdf
-            // https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf
-            // q = a1 x a2 = a1a2 + e(a1b2 + a2b1)
-            // a = t, b = r
-            // since r's dual part is 0, and t's real part is 1,
-            // q = 1*t2 + e(1*0 + t2*r1) = t2 + e(t2*r1)
-            // q = (tx + ty + tz) + e((tx + ty + tz)(rx+ry+rz))
-            // q.w = 0
+            // // http://web.cs.iastate.edu/~cs577/handouts/dual-quaternion.pdf
+            // // https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf
+            // // t = t1 + e(t2)
+            // // q = t x r = t1r1 + e(t1r2 + t2r1)
+            // // since r's dual part (r2) is 0, and t's real part (t1) is 1,
+            // // q = 1*r1 + e(1*0 + t2*r1)
+            // // q = (rx + ry + rz) + e((tx + ty + tz)(rx+ry+rz))
+            // // q.real.w = 0;
+            // // q.real.x = rx;
+            // // q.real.y = ry;
+            // // q.real.z = rz;
+            // // q.dual.w = 0;
+            // // q.dual.xyz = t.xyz * r.xyz;
+            // glm::quat r = rotations.at(i);
+            // r.w = 0;
+            // dq_real.push_back(r);
+            // dq_conjugate_real.push_back(glm::conjugate(r));
+            // q.w = 0;
+            // q = q * r;
+            // dq_dual.push_back(q);
+            // dq_conjugate_dual.push_back(glm::conjugate(q));
 
             
             E[3] = glm::vec4(p, 1.0f);
@@ -385,7 +439,6 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
-        bool idk = false;
 
         // creates clear dummy vectors
         glm::vec4 position;
@@ -410,14 +463,18 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
             // skinned normals
             glm::vec4 dum2 = skin->getBind(bone) * y;
-            // dum2  = skin->getAnime(k, bone) * dum2;
             dum2 = howdy.at(bone) * dum2;
+            // dum2  = skin->getAnime(k, bone) * dum2;
             dum2 = weiBuf.at(2*i+j) * dum2;
             normal = normal + dum2;
-            if (i == 6) {
-                cout << bone << " " << weiBuf.at(2*i+j) << " " << dum1.z << endl;
-            }
+            // if (i == 6) {
+            //     cout << bone << " " << weiBuf.at(2*i+j) << " " << dum1.z << endl;
+            // }
+
         }
+        // cout << "position of " << i << ": " << position.x << " " << position.z << endl; 
+        // position = x;
+        // normal = y;
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;
@@ -430,16 +487,44 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
         skinnedNor.at(3*i) = normal.x;
         skinnedNor.at(3*i+1) = normal.y;
         skinnedNor.at(3*i+2) = normal.z;
-        idk = false;
     }
 }
 
 // glm::vec4 DQS(int vertex) {
+
      
 // }
 
+// input: unit quaternion 'q0', translation vector 't' 
+// output: unit dual quaternion 'dq'
+void QuatTrans2UDQ(const float q0[4], const float t[3], 
+                  float dq[2][4])
+{
+   // non-dual part (just copy q0):
+   for (int i=0; i<4; i++) dq[0][i] = q0[i];
+   // dual part:
+   dq[1][0] = -0.5*(t[0]*q0[1] + t[1]*q0[2] + t[2]*q0[3]);
+   dq[1][1] = 0.5*( t[0]*q0[0] + t[1]*q0[3] - t[2]*q0[2]);
+   dq[1][2] = 0.5*(-t[0]*q0[3] + t[1]*q0[0] + t[2]*q0[1]);
+   dq[1][3] = 0.5*( t[0]*q0[2] - t[1]*q0[1] + t[2]*q0[0]);
+}
+
 void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
 
+    // http://simonstechblog.blogspot.com/2011/11/dual-quaternion.html
+    // p = q[1 + e(pxi + pyj + pzk)]q*
+    glm::quat p;
+    // iterates all the vertices
+    for (int i = 0; i < posBuf.size()/3; ++i) {
+
+        for (int j = 0; j < 2; ++j) {
+
+            int bone = bonBuf.at(2*i+j);
+
+            
+
+        }
+    }
 }
 
 void ShapeSkin::init(bool b)
@@ -554,8 +639,11 @@ void ShapeSkin::draw(bool b)
  
 	// Draw
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elemBufID);
-	glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
-    
+    if (WIREFRAME)
+	    glDrawElements(GL_LINES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+    else
+        glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+
     if (b) {
         glDisableVertexAttribArray(h_wei0);
         glDisableVertexAttribArray(h_wei1);
