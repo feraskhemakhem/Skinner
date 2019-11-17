@@ -58,7 +58,6 @@ public:
 	void init(bool b = false);
 	void draw(bool b = false);
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
-    void skinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
 
     // helpers 
@@ -87,8 +86,9 @@ private:
     unsigned bonBufID;
 
     // DQS
-    std::vector<glm::quat> translations;
     std::vector<glm::quat> rotations;
+    std::vector<glm::quat> dq;
+    std::vector<glm::quat> dq_conjucate;
 };
 
 #endif

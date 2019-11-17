@@ -306,9 +306,10 @@ void render()
 	glEnd();
 	int timeScale;
 	if (!TS)
-		timeScale = 4;
+		timeScale = 0;
 	else
-    timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
+		timeScale = 420;
+    // timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
     if(!keyToggles[(unsigned)'b']) {
         // drawing bones
         float boneScale = 0.05f; // determines the size of the bones
@@ -318,20 +319,20 @@ void render()
 
         for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
             MV->pushMatrix();
-						// howdy = howdy * walker->getAnime(timeScale, i);
-            MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
-						// MV->multMatrix(howdy);
+						howdy = howdy * walker->getAnime(timeScale, i);
+            // MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
+						MV->multMatrix(howdy);
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
             glLineWidth(2);
             glBegin(GL_LINES);
-            glColor3f(1, 0, 0);
+            glColor3f(3, 0, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(boneScale, 0, 0);
-            glColor3f(0, 1, 0);
+            glColor3f(0, 3, 0);
             glVertex3f(0, 0, 0);
             glVertex3f(0, boneScale, 0);
-            glColor3f(0, 0, 1);
+            glColor3f(0, 0, 3);
             glVertex3f(0, 0, 0);
             glVertex3f(0, 0, boneScale);
             glEnd();
@@ -357,11 +358,10 @@ void render()
 		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
 		// apply skin
-		shape->skinOn(walker, timeScale);
-		// if (LBS)
-		// 	shape->LBSskinOn(walker, timeScale);
-		// else
-		// 	shape->DQSskinOn(walker, timeScale);
+		if (LBS)
+			shape->LBSskinOn(walker, timeScale);
+		else
+			shape->DQSskinOn(walker, timeScale);
 
 		shape->setProgram(progSkin);
 		shape->draw();
