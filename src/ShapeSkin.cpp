@@ -242,7 +242,7 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
 // 	}
 // }
 
-// load self generated attachment file
+// loads locations of vertices in xyz place
 void ShapeSkin::loadAttachment(const int num_bones, const int width) 
 {
     assert (num_bones != 0);
@@ -272,7 +272,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // vertex location * ratio will give us the index of bone we are at
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
-        bone_index = -1;
+        // bone_index = -1;
         cout << "bone index " << bone_index << endl;
 
         // edge cases - if an invisible bone is weighted, make it unimportant
@@ -447,6 +447,8 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             p.z = 0;
             
             E[3] = glm::vec4(p, 1.0f);
+            if (i != 0)
+                E = skin->getAnime(j, i-1) * E;
             skin->addAnime(j, E);
 
 
@@ -470,13 +472,12 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
     // heirarchy applied to bones
-    // move_bones(k);
     assert(num_bones != 0);
-    vector<glm::mat4> howdy;
-    howdy.push_back(skin->getAnime(k, 0));
-    for (int i = 1; i < num_bones; ++i) {
-        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
-    }
+    // vector<glm::mat4> howdy;
+    // howdy.push_back(skin->getAnime(k, 0));
+    // for (int i = 1; i < num_bones; ++i) {
+    //     howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+    // }
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
@@ -490,41 +491,29 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
         
         // calculates skinned position and normal
         for (int j = 0; j < 2; ++j) {
+
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
-            // if (bone > 2) {
-            //     cout << "BONE TOO BIG" << endl;
-            // }
-            // glm::vec4 dum1 = x;
+
             glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-            dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
-            // dum1 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
-            glm::vec4 dum3 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
-            position = position + dum3;
+            dum1 = skin->getAnime(k, bone) * dum1;
+            // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+            dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
+            position = position + dum1;
 
             // skinned normals
-            // glm::vec4 dum2 = y;
             glm::vec4 dum2 = skin->getBind(bone) * y;
-            dum2 = howdy.at(bone) * dum2;
-            // dum2  = skin->getAnime(k, bone) * dum2;
+            dum2 = skin->getAnime(k, bone) * dum2;
+            // dum2 = howdy.at(bone) * dum2;
             dum2 = weiBuf.at(2*i+j) * dum2;
             normal = normal + dum2;
-            // if (i == 6) {
-            //     cout << bone << " " << weiBuf.at(2*i+j) << " " << dum1.z << endl;
-            // }
 
         }
-        // cout << "position of " << i << ": " << position.x << " " << position.z << endl; 
-        // position = x;
-        // normal = y;
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;
         skinnedPos.at(3*i+1) = position.y;
         skinnedPos.at(3*i+2) = position.z;
-        // if (skinnedPos.at(3*i+2) < -3) {
-        //     cout << i << endl;
-        // }
         
         skinnedNor.at(3*i) = normal.x;
         skinnedNor.at(3*i+1) = normal.y;
@@ -683,6 +672,65 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
         skinnedNor.at(3*i+1) = normal.y;
         skinnedNor.at(3*i+2) = normal.z;
 
+    }
+}
+
+glm::mat4 ShapeSkin::DQS(std::shared_ptr<Skinner> skin, int vertex) {
+    glm::mat4 k(1.0f);
+    return k;
+}
+
+glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
+    // calculates skinned position and normal
+    glm::mat4 lbs_mat(0.0f);
+    for (int j = 0; j < 2; ++j) {
+
+        // i is vertex, j is bone, k is time
+        int bone = bonBuf.at(2*vertex+j);
+
+        glm::mat4 dum1 = skin->getBind(bone);
+        // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+        // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+        dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
+
+        lbs_mat += dum1;
+    }
+    return lbs_mat;
+}
+
+void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor) {
+
+    // apply heirarchy of animations
+    assert(num_bones != 0);
+    bone_translation.clear();
+    bone_translation.push_back(skin->getAnime(k, 0));
+    for (int i = 1; i < num_bones; ++i) {
+        bone_translation.push_back(bone_translation.at(i-1) * skin->getAnime(k,i));
+    }
+
+        // iterates all the vertices
+    for (int i = 0; i < posBuf.size()/3; ++i) {
+
+        // creates clear dummy vectors
+        glm::vec4 position;
+        glm::vec4 normal;
+        glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
+        glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
+
+        
+        // calculates skinned position and normal with an interpolation of LBS and DQS
+        glm::mat4 interpol =(1-deform_factor) * LBS(skin, i) + deform_factor * DQS(skin, i);
+        position = interpol * x;
+        normal = interpol * y;
+        
+        // adjusts values of position and normal respectively
+        skinnedPos.at(3*i) = position.x;
+        skinnedPos.at(3*i+1) = position.y;
+        skinnedPos.at(3*i+2) = position.z;
+        
+        skinnedNor.at(3*i) = normal.x;
+        skinnedNor.at(3*i+1) = normal.y;
+        skinnedNor.at(3*i+2) = normal.z;
     }
 }
 

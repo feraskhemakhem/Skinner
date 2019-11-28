@@ -59,6 +59,7 @@ public:
 	void draw(bool b = false);
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
+    void skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor = 0);
 
 
 	
@@ -84,12 +85,15 @@ private:
     unsigned influID;
     unsigned bonBufID;
 
+    // animations - LBS
+    std::vector<glm::mat4> bone_translation;
+
     // DQS
     std::vector<glm::quat> rotations;
     std::vector<glm::vec3> translations;
     std::vector<std::vector<glm::quat>> dq_real;
     std::vector<std::vector<glm::quat>> dq_dual;
-    std::vector<glm::quat> bind_rotation;
+    std::vector<glm::quat> bind_rotatiaon;
     std::vector<glm::quat> bind_translation;
     
     // getters
@@ -103,11 +107,13 @@ private:
     // std::vector<glm::quat> dq_real;
     // std::vector<glm::quat> dq_dual;
     
-    // helpers 
-    // glm::vec4 DQS(std::shared_ptr<Skinner> skin, int vertex);
-    // glm::vec4 LBS(std::shared_ptr<Skinner> skin, int vertex);
+    // helpers for calculating DQS
     void QuatTrans2UDQ(int j, const glm::quat& r, const glm::vec3& t);
     glm::mat4 DQToMatrix(glm::quat Qr, glm::quat Qd);
+
+    // general helper functions
+    glm::mat4 DQS(std::shared_ptr<Skinner> skin, int vertex);
+    glm::mat4 LBS(std::shared_ptr<Skinner> skin, int vertex);
 };
 
 #endif

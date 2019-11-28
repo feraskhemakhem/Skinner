@@ -31,9 +31,9 @@ int NUM_VERTICES_HORIZ = 4;
 int NUM_VERTICES_VERT = 2;
 int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
-float COEFFICIENT = 0.5; // coefficient for the weight between LBS and DQS
+float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
-bool LBS = false;
+bool LBS = true;
 bool TIMESCALE = true;
 
 shared_ptr<Camera> camera = NULL;
@@ -145,36 +145,6 @@ void loadScene()
 	progBonus = make_shared<Program>();
 	progBonus->setShaderNames(RESOURCE_DIR + "bonus_vert.glsl", RESOURCE_DIR + "bonus_frag.glsl");
 	progBonus->setVerbose(true);
-}
-
-// recursive function that draws heirarchy of bones
-void draw_bone(int i, int boneScale, int timeScale, shared_ptr<MatrixStack> MV, shared_ptr<MatrixStack> P) { // input is index
-
-
-	// MV->pushMatrix();
-	// MV->multMatrix(walker->getBind(i));
-	// MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
-	// if (i+1 < NUM_BONES) { // if there are more bones
-	// 	draw_bone(i+1, boneScale, timeScale, MV, P);				
-	// }
-	// actually draw this bone
-	// glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-	// glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-		// Get current frame buffer size.
-		cout << "calling draw bone" << endl;
-		glLineWidth(2);
-		glBegin(GL_LINES);
-		glColor3f(1, 0, 0);
-		glVertex3f(0, 0, 0);
-		glVertex3f(boneScale, 0, 0);
-		glColor3f(0, 1, 0);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, boneScale, 0);
-		glColor3f(0, 0, 1);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 0, boneScale);
-		glEnd();
-	// MV->popMatrix();
 }
 
 void init()
@@ -322,7 +292,7 @@ void render()
             MV->pushMatrix();
 						howdy = howdy * walker->getAnime(timeScale, i);
             // MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
-						MV->multMatrix(howdy);
+						MV->multMatrix(walker->getAnime(timeScale, i));
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
             glLineWidth(2);
@@ -388,6 +358,7 @@ int main(int argc, char **argv)
 	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
 	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
 	TIMESCALE = argc > 6 ? (string(argv[6]) == "T" ? true : false) : false;
+	DEFORM_FACTOR = argc > 7 ? atoi(argv[7]) : 0.5;
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone
