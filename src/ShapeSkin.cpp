@@ -72,13 +72,13 @@ void ShapeSkin::loadMesh(const string &meshName)
 	}
 }
 
-void ShapeSkin::loadMesh(const int num_vertices, const int length, const int width) {
+void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_vert, const int length, const int width) {
     // determine how much to seperate each vertex, and the set points
     float dist_seperation = (float)width / ((num_vertices / 2) - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
     float current_x = -1 * width / 2.0;
     this->num_vertices = num_vertices;
 
-    std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
+    // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
 
     // first vertex is at -width/2, all the way to width/2
     cout << dist_seperation << " is distance between each vertex" << endl;
@@ -251,6 +251,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // vertex location * ratio will give us the index of bone we are at
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
+        bone_index = -1;
         cout << "bone index " << bone_index << endl;
 
         // edge cases - if an invisible bone is weighted, make it unimportant
@@ -319,6 +320,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
     glm::quat q; // quaternion
     glm::vec3 p; // position
     glm::mat4 E;
+    PushDQ();
     for (int i = 0; i < nbones; ++i) {
         // we read the first line seperately in order to have the initial
 
@@ -326,6 +328,10 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
         q.y = 0;
         q.z = 0;
         q.w = 1;
+
+        q = normalize(q);
+
+        // bind_rotation.push_back(q);
 
         // do not move, just rotate
         p.x = bonLoc.at(i);
@@ -335,6 +341,10 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
         //     p.x = bonLoc.at(bonLoc.size()-1);
         p.y = 0;
         p.z = 0;
+
+        // bind_translation.push_back(p);
+
+        QuatTrans2UDQ(0, q, p);
             
         E = mat4_cast(q); // converting each 4-tuple to one 4x4 trans matrix
         E[3] = glm::vec4(p, 1.0f);
@@ -344,6 +354,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
     for (int j = 0; j < 18; ++j) { // 18 animations, to get to 90 degrees
         // we read the the rest of the lines are not bind pose so yeah
         skin->pushAnime();
+        PushDQ();
         for (int i = 0; i < nbones; ++i) {
             // rotate 5 degree across y axis
 
@@ -376,6 +387,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
                 q = normalize(rotations.at(i-1) * q);
             rotations.push_back(q);
 
+            // cout << "q.w " << q.w << endl;
 
             // do not move, just rotate
             // p.x = bonLoc.at(i);
@@ -385,41 +397,22 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
                 p.x = dist_seperation;
             p.y = 0;
             p.z = 0;
-
-            // // create translational quaternion for DQS
-            // // http://simonstechblog.blogspot.com/2011/11/dual-quaternion.html
-            // q.w = 1;
-            // q.x = p.x / 2;
-            // q.y = p.y / 2;
-            // q.z = p.z / 2;
-
-            // q = normalize(q);
-
-            // // http://web.cs.iastate.edu/~cs577/handouts/dual-quaternion.pdf
-            // // https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf
-            // // t = t1 + e(t2)
-            // // q = t x r = t1r1 + e(t1r2 + t2r1)
-            // // since r's dual part (r2) is 0, and t's real part (t1) is 1,
-            // // q = 1*r1 + e(1*0 + t2*r1)
-            // // q = (rx + ry + rz) + e((tx + ty + tz)(rx+ry+rz))
-            // // q.real.w = 0;
-            // // q.real.x = rx;
-            // // q.real.y = ry;
-            // // q.real.z = rz;
-            // // q.dual.w = 0;
-            // // q.dual.xyz = t.xyz * r.xyz;
-            // glm::quat r = rotations.at(i);
-            // r.w = 0;
-            // dq_real.push_back(r);
-            // dq_conjugate_real.push_back(glm::conjugate(r));
-            // q.w = 0;
-            // q = q * r;
-            // dq_dual.push_back(q);
-            // dq_conjugate_dual.push_back(glm::conjugate(q));
-
             
             E[3] = glm::vec4(p, 1.0f);
             skin->addAnime(j, E);
+
+
+            // multiple bind with E and parents
+            // convert to quat and vec3
+            // quattrans2uqd
+
+
+            if (i != 0)
+                p = translations.at(i-1) + p;
+            translations.push_back(p);
+
+            // create dual quaternion based on this data
+            QuatTrans2UDQ(j+1, q, p);
         }
 
         
@@ -451,10 +444,10 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
         for (int j = 0; j < 2; ++j) {
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
-            if (bone > 2) {
-                cout << "BONE TOO BIG" << endl;
-            }
-
+            // if (bone > 2) {
+            //     cout << "BONE TOO BIG" << endl;
+            // }
+            // glm::vec4 dum1 = x;
             glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
             dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
             // dum1 = skin->getAnime(k, bone) * dum1; // inverse of bind matrix of jth bone at frame k
@@ -462,6 +455,7 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
             position = position + dum3;
 
             // skinned normals
+            // glm::vec4 dum2 = y;
             glm::vec4 dum2 = skin->getBind(bone) * y;
             dum2 = howdy.at(bone) * dum2;
             // dum2  = skin->getAnime(k, bone) * dum2;
@@ -490,40 +484,160 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
     }
 }
 
-// glm::vec4 DQS(int vertex) {
-
-     
-// }
-
-// input: unit quaternion 'q0', translation vector 't' 
+// based heavily on C source code from https://www.cs.utah.edu/~ladislav/dq/
+// input: animation index 'j', unit quaternion 'q0', translation vector 't' 
 // output: unit dual quaternion 'dq'
-void QuatTrans2UDQ(const float q0[4], const float t[3], 
-                  float dq[2][4])
+void ShapeSkin::QuatTrans2UDQ(int j, const glm::quat& r, const glm::vec3& t)
 {
-   // non-dual part (just copy q0):
-   for (int i=0; i<4; i++) dq[0][i] = q0[i];
-   // dual part:
-   dq[1][0] = -0.5*(t[0]*q0[1] + t[1]*q0[2] + t[2]*q0[3]);
-   dq[1][1] = 0.5*( t[0]*q0[0] + t[1]*q0[3] - t[2]*q0[2]);
-   dq[1][2] = 0.5*(-t[0]*q0[3] + t[1]*q0[0] + t[2]*q0[1]);
-   dq[1][3] = 0.5*( t[0]*q0[2] - t[1]*q0[1] + t[2]*q0[0]);
+    glm::quat real, dual;
+    // non-dual part (just copy q0):
+    real = r;
+    // dual part: https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
+    dual.w = -0.5*(t.x*r.x + t.y*r.y + t.z*r.z);
+    dual.x = 0.5*( t.x*r.w + t.y*r.z - t.z*r.y);
+    dual.y = 0.5*(-t.x*r.z + t.y*r.w + t.z*r.x);
+    dual.z = 0.5*( t.x*r.y - t.y*r.x + t.z*r.w);
+
+    if (j == -1) {
+        r1 = real;
+        d1 = dual;
+        return;
+    }
+    else if (j == -2) {
+        r2 = real;
+        d2= real;
+        return;
+    }
+    addDQ(j, real, dual);
+
+    // if (j == 0) {
+    //     cout << "t " <<  t.x << " " << t.y << " " << t.z << " r " << r.w << " " << r.x << " " << r.y << " " << r.z << endl;
+    // }
+}
+
+// influenced heavily on course Cg source code from https://www.cs.utah.edu/~ladislav/dq/dqs.cg
+// input: real quaternion, dual quaternion
+// output: transformation matrix
+glm::mat4 ShapeSkin::DQToMatrix(glm::quat Qr, glm::quat Qd)
+{	
+	glm::mat4 M;
+	float len2 = glm::dot(Qr, Qr);
+	float w = Qr.x, x = Qr.y, y = Qr.z, z = Qr.w;
+	float t0 = Qd.x, t1 = Qd.y, t2 = Qd.z, t3 = Qd.w;
+
+    // cout << "DQToMatrix " << len2 << " " << Qr.w << " " << Qr.x << " " << Qr.y << " " << Qr.z << endl;
+    
+    // https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf - pg 9
+	M[0][0] = w*w + x*x - y*y - z*z; M[0][1] = 2*x*y - 2*w*z; M[0][2] = 2*x*z + 2*w*y;
+	M[1][0] = 2*x*y + 2*w*z; M[1][1] = w*w + y*y - x*x - z*z; M[1][2] = 2*y*z - 2*w*x; 
+	M[2][0] = 2*x*z - 2*w*y; M[2][1] = 2*y*z + 2*w*x; M[2][2] = w*w + z*z - x*x - y*y;
+	
+    glm::quat t = Qd * 2.0f * glm::conjugate(Qr);
+	// M[3][0] = -2*t0*x + 2*w*t1 - 2*t2*z + 2*y*t3;
+	// M[3][1] = -2*t0*y + 2*t1*z - 2*x*t3 + 2*w*t2;
+	// M[3][2] = -2*t0*z + 2*x*t2 + 2*w*t3 - 2*t1*y;
+    M[3][0] = t.x;
+	M[3][1] = t.y;
+	M[3][2] = t.z;
+    // M[0][3] = t.x;
+	// M[0][3] = t.y;
+	// M[0][3] = t.z;
+    // cout << M[0][3] << "\t";
+
+	M /= len2;
+    // cout << M[0][3] << endl;
+
+	
+	return M;
 }
 
 void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
 
-    // http://simonstechblog.blogspot.com/2011/11/dual-quaternion.html
-    // p = q[1 + e(pxi + pyj + pzk)]q*
-    glm::quat p;
+    // https://www.cs.utah.edu/~ladislav/dq/dqs.cg - dqsAntipod
+    glm::quat r, d;
     // iterates all the vertices
+
+    vector<glm::mat4> howdy;
+    howdy.push_back(skin->getAnime(k, 0));
+    for (int i = 1; i < num_bones; ++i) {
+        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+    }
+
     for (int i = 0; i < posBuf.size()/3; ++i) {
 
-        for (int j = 0; j < 2; ++j) {
 
-            int bone = bonBuf.at(2*i+j);
+        int bone1 = bonBuf.at(2*i);
+        int bone2 = bonBuf.at(2*i+1);
 
-            
+        // cout << i << " " << bone1 << " " << weiBuf.at(2*i) << " " << bone2 << " " << weiBuf.at(2*i+1) << endl;
 
+        // glm::quat r1 = glm::conjugate(GetReal(0, bone1)) * GetReal(k+1, bone1);
+        // glm::quat d1 = glm::conjugate(GetDual(0, bone1)) * GetDual(k+1, bone1);
+        // glm::quat r2 = glm::conjugate(GetReal(0, bone2)) * GetReal(k+1, bone2);
+        // glm::quat d2 = glm::conjugate(GetDual(0, bone2)) * GetDual(k+1, bone2);
+
+        // multiple bind with E and parents
+        // convert to quat and vec3
+        // quattrans2uqd
+        glm::mat4 temp = howdy.at(bone1) * skin->getBind(bone1);
+        glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
+        cout << "Vertex " << i << endl;
+        for (int a = 0; a < 4; ++a) {
+            for (int b = 0; b < 4; ++b) {
+                cout << temp[a][b] << " ";
+            }
+            cout << endl;
         }
+        cout << endl;
+        // cout << trans.x << " " << trans.y << " " << trans.z << endl;
+        glm::quat rot = quat_cast(temp);
+        QuatTrans2UDQ(-1, rot, trans);
+        
+        temp = howdy.at(bone2) * skin->getBind(bone2);
+        trans = glm::vec3(temp[0][3], temp[1][3], temp[2][3]);
+        rot = quat_cast(temp);
+        QuatTrans2UDQ(-2, rot, trans);
+        
+        // glm::quat r1 = GetReal(k+1, bone1);
+        // glm::quat d1 = GetDual(k+1, bone1);
+        // glm::quat r2 = GetReal(k+1, bone2);
+        // glm::quat d2 = GetDual(k+1, bone2);
+
+
+        // to ensure shortest path rotation
+        if (glm::dot(r1, r2) < 0.0) {
+            if (i+1 == num_vertices || i+2 == num_vertices) {
+                cout << "flipped" << endl;
+            }
+            r2 *= -1.0;
+            d2 *= -1.0;
+        }
+
+        // apply weights
+        // bone 1
+        r = weiBuf.at(2*i) * r1;
+        d = weiBuf.at(2*i) * d1;
+        // bone 2
+        r += weiBuf.at(2*i+1) * r2;
+        d += weiBuf.at(2*i+1) * d2;
+
+        // glm::mat4 trans_mat = (skin->getBind(bone1)*weiBuf.at(2*i) + skin->getBind(bone2)*weiBuf.at(2*i+1)) * DQToMatrix(r, d);
+        glm::mat4 trans_mat = DQToMatrix(r, d);
+        glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
+        glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
+
+        
+        glm::vec4 position = trans_mat * x;
+        glm::vec4 normal = trans_mat * y; 
+
+        skinnedPos.at(3*i) = position.x;
+        skinnedPos.at(3*i+1) = position.y;
+        skinnedPos.at(3*i+2) = position.z;
+
+        skinnedNor.at(3*i) = normal.x;
+        skinnedNor.at(3*i+1) = normal.y;
+        skinnedNor.at(3*i+2) = normal.z;
+
     }
 }
 

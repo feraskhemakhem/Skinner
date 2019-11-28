@@ -49,7 +49,7 @@ public:
 	ShapeSkin();
 	virtual ~ShapeSkin();
 	void loadMesh(const std::string &meshName);
-    void loadMesh(const int num_vertices, const int length, const int width);
+    void loadMesh(const int num_vertices_horiz, const int num_vertices_vert, const int length, const int width);
     // void loadAttachment(std::shared_ptr<Skinner> skin, const int num_bones);
     void loadAttachment(const int num_bones, const int width);
     // void loadSkeleton(std::shared_ptr<Skinner> skin);
@@ -85,15 +85,28 @@ private:
 
     // DQS
     std::vector<glm::quat> rotations;
-    std::vector<glm::quat> dq_real;
-    std::vector<glm::quat> dq_dual;
-    std::vector<glm::quat> dq_conjugate_real;
-    std::vector<glm::quat> dq_conjugate_dual;
+    std::vector<glm::vec3> translations;
+    std::vector<std::vector<glm::quat>> dq_real;
+    std::vector<std::vector<glm::quat>> dq_dual;
+    std::vector<glm::quat> bind_rotation;
+    std::vector<glm::quat> bind_translation;
+    
+    // getters
+    glm::quat r1, d1, r2, d2;
+    glm::quat GetReal(int k, int j) {if (k >= dq_real.size()) {k = dq_real.size()-1;} return dq_real.at(k).at(j%dq_real.at(k).size());};
+    glm::quat GetDual(int k, int j) {if (k >= dq_dual.size()) {k = dq_dual.size()-1;} return dq_dual.at(k).at(j%dq_dual.at(k).size());};
+    void addDQ(int k, glm::quat r, glm::quat d) {dq_real.at(k).push_back(r); dq_dual.at(k).push_back(d);};
+
+    void PushDQ() {dq_real.push_back(std::vector<glm::quat>()); dq_dual.push_back(std::vector<glm::quat>());}
+
+    // std::vector<glm::quat> dq_real;
+    // std::vector<glm::quat> dq_dual;
     
     // helpers 
     // glm::vec4 DQS(std::shared_ptr<Skinner> skin, int vertex);
     // glm::vec4 LBS(std::shared_ptr<Skinner> skin, int vertex);
-    void QuatTrans2UDQ(const float q0[4], const float t[3], float dq[2][4]);
+    void QuatTrans2UDQ(int j, const glm::quat& r, const glm::vec3& t);
+    glm::mat4 DQToMatrix(glm::quat Qr, glm::quat Qd);
 };
 
 #endif

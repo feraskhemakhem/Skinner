@@ -27,13 +27,14 @@ using namespace glm;
 GLFWwindow *window; // Main application window
 string RESOURCE_DIR = ""; // Where the resources are loaded from
 int NUM_BONES = 2; // 2 bones by default
-int NUM_VERTICES = 4;
+int NUM_VERTICES_HORIZ = 4;
+int NUM_VERTICES_VERT = 2;
 int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float COEFFICIENT = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
-bool LBS = true;
-bool TS = true;
+bool LBS = false;
+bool TIMESCALE = true;
 
 shared_ptr<Camera> camera = NULL;
 shared_ptr<ShapeSkin> shape = NULL;
@@ -125,7 +126,7 @@ void loadScene()
 	
 	// Single shape for all the animations.
 	shape = make_shared<ShapeSkin>();
-	shape->loadMesh(NUM_VERTICES, RECT_LENGTH, RECT_WIDTH);
+	shape->loadMesh(NUM_VERTICES_HORIZ, NUM_VERTICES_VERT, RECT_LENGTH, RECT_WIDTH);
 
 	shape->loadAttachment(NUM_BONES, RECT_WIDTH);
 	// This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
@@ -305,7 +306,7 @@ void render()
 
 	glEnd();
 	int timeScale;
-	if (!TS)
+	if (!TIMESCALE)
 		timeScale = 0;
 	else
 		// timeScale = 420;
@@ -386,19 +387,16 @@ int main(int argc, char **argv)
 	// RESOURCE_DIR = argv[1] + string("/");
 	RESOURCE_DIR = "../resources/";
 	NUM_BONES = argc > 1 ? atoi(argv[1]) : 2;
-	NUM_VERTICES = argc > 2 ? atoi(argv[2]) : 4;
-	RECT_WIDTH = argc > 3 ? atoi(argv[3]) : 20;
-	RECT_LENGTH = argc > 4 ? atoi(argv[4]) : 10;
-	TS = argc > 5 ? (string(argv[5]) == "T" ? true : false) : false;
-
-	// if vertex count is odd, round up to make even
-	if (NUM_VERTICES%2 == 1) {
-		NUM_VERTICES++;
-	}
+	NUM_VERTICES_HORIZ = argc > 2 ? atoi(argv[2]) : 4;
+	NUM_VERTICES_VERT = argc > 3 ? atoi(argv[3]) : 2;
+	RECT_WIDTH = argc > 4 ? atoi(argv[3]) : 20;
+	RECT_LENGTH = argc > 5 ? atoi(argv[4]) : 10;
+	TIMESCALE = argc > 6 ? (string(argv[5]) == "T" ? true : false) : false;
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone
-	assert (NUM_VERTICES%2 == 0); // even # vertices
+	assert (NUM_VERTICES_HORIZ > 0); // at least 1 vertices each direction
+	assert (NUM_VERTICES_VERT > 0);
 	assert (RECT_WIDTH > 0); // positive width
 	assert (RECT_LENGTH > 0); // positive length
 
