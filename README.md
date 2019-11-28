@@ -14,7 +14,7 @@ To compile the project:
 The project currenntly takes the following input to run:
 
 `
-./A6 [NUM BONES] [NUM VERTICES] [RECT WIDTH] [RECT LENGTH] [ANIMATED?]
+./A6 [NUM BONES] [NUM VERTICES WIDE] [NUM VERTICES LONG] [RECT WIDTH] [RECT LENGTH] [ANIMATED? (T or F)]
 `
 
 These inputs respond to the folder where the shaders exist, the object being skinned, attachment file, and skeleton file. This input will

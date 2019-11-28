@@ -74,38 +74,64 @@ void ShapeSkin::loadMesh(const string &meshName)
 
 void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_vert, const int length, const int width) {
     // determine how much to seperate each vertex, and the set points
-    float dist_seperation = (float)width / ((num_vertices / 2) - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
+    float dist_seperation_horiz = (float)width / (num_vertices_horiz - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
+    float dist_seperation_vert = (float)length / (num_vertices_vert - 1);
     float current_x = -1 * width / 2.0;
-    this->num_vertices = num_vertices;
+    float current_z = -1 * length / 2.0;
+    vector<float> vertical_vertex_locations;
+    this->num_vertices_horiz = num_vertices_horiz;
+    this->num_vertices_vert = num_vertices_vert;
 
     // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
 
+    // calculate the locations in the z direction where vertices go once
+    cout << "z locations at ";
+    while ((current_z - (float)length / 2) <= 0.001) {
+        vertical_vertex_locations.push_back(current_z);
+        cout << current_z << " ";
+        current_z += dist_seperation_vert;
+    }
+    cout << endl;
+
     // first vertex is at -width/2, all the way to width/2
-    cout << dist_seperation << " is distance between each vertex" << endl;
-    cout << "vertices at "; 
+    // cout << dist_seperation_horiz << " is distance between each vertex" << endl;
+    // cout << "vertices at "; 
     while ((current_x - ((float)width / 2)) <= 0.001) {
-        // add lower vertex
-        posBuf.push_back(current_x);
-        posBuf.push_back(0);
-        posBuf.push_back(-1 * length / 2.0);
 
-        // add lower normal
-        norBuf.push_back(current_x);
-        norBuf.push_back(1);
-        norBuf.push_back(-1 * length / 2.0);
+        // add vertices and normals, one for each unique z value
+        for (int i = 0; i < vertical_vertex_locations.size(); ++i) {
+            // add vertex
+            posBuf.push_back(current_x); // x value calculated in parent while loop
+            posBuf.push_back(0); // y value always 0 for 2D vertices
+            posBuf.push_back(vertical_vertex_locations.at(i)); // precalculated z value
 
-        // add upper vertex
-        posBuf.push_back(current_x);
-        posBuf.push_back(0);
-        posBuf.push_back(length / 2.0);
+            // add normal
+            norBuf.push_back(current_x); // x value calculated in parent while loop
+            norBuf.push_back(1); // y value always 1 for 2D normals
+            norBuf.push_back(vertical_vertex_locations.at(i)); // precalculated z value
+        }
+        // // add lower vertex
+        // posBuf.push_back(current_x);
+        // posBuf.push_back(0);
+        // posBuf.push_back(-1 * length / 2.0);
 
-        // add upper normal
-        norBuf.push_back(current_x);
-        norBuf.push_back(1);
-        norBuf.push_back(length / 2.0);
+        // // add lower normal
+        // norBuf.push_back(current_x);
+        // norBuf.push_back(1);
+        // norBuf.push_back(-1 * length / 2.0);
+
+        // // add upper vertex
+        // posBuf.push_back(current_x);
+        // posBuf.push_back(0);
+        // posBuf.push_back(length / 2.0);
+
+        // // add upper normal
+        // norBuf.push_back(current_x);
+        // norBuf.push_back(1);
+        // norBuf.push_back(length / 2.0);
         cout << current_x << " ";
 
-        current_x += dist_seperation;
+        current_x += dist_seperation_horiz;
     }
     cout << endl;
 
@@ -117,73 +143,66 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
 
     // add vertices that make up a face (first and last 2 vertices)
     if (WIREFRAME) {
-
-        for (int i = 0; i < posBuf.size()/3 - 2; ++i) {
+        // for horizontal lines
+        for (int i = 0; i < posBuf.size()/3 - this->num_vertices_vert; ++i) { 
             elemBuf.push_back(i);
-            elemBuf.push_back(i+2);
+            elemBuf.push_back(i+this->num_vertices_vert);
             
-            elemBuf.push_back(i+2);        
+            elemBuf.push_back(i+this->num_vertices_vert);        
             elemBuf.push_back(i);      
         }
+        cout << "i's" << endl;
 
-        for (int i = 0; i < posBuf.size()/3 - 1; ++i) {
-            elemBuf.push_back(i+1);        
-            elemBuf.push_back(i); 
+        // for vertical lines
+        for (int i = 0; i < posBuf.size()/3 - 1; ++i) { 
+            if ((i+1) % this->num_vertices_vert != 0) { // eliminates diagonals
+                elemBuf.push_back(i+1);        
+                elemBuf.push_back(i); 
 
-            elemBuf.push_back(i);        
-            elemBuf.push_back(i+1); 
+                elemBuf.push_back(i);        
+                elemBuf.push_back(i+1); 
+            }
         }
+
+        // for diagonal lines
+        for (int i = 1; i < posBuf.size()/3 - this->num_vertices_vert; ++i) {
+            if (i % this->num_vertices_vert != 0) {
+                elemBuf.push_back(i);
+                elemBuf.push_back(i+this->num_vertices_vert-1);
+
+                elemBuf.push_back(i+this->num_vertices_vert-1);
+                elemBuf.push_back(i);
+            }
+        }
+
     }
     else {
-        for (int i = 0; i < posBuf.size()/3 - 2; ++i) {
-            elemBuf.push_back(i);
-            elemBuf.push_back(i+1);
-            elemBuf.push_back(i+2);
+        // creating lower left triangles
+        for (int i = 0; i < posBuf.size()/3 - 1 - this->num_vertices_vert; ++i) { // additional -1 because of the we are using lower left corners
+            if ((i+1) % this->num_vertices_vert != 0) { // top row doesn't create triangles
+                elemBuf.push_back(i);
+                elemBuf.push_back(i+1);
+                elemBuf.push_back(i+this->num_vertices_vert);
 
-            elemBuf.push_back(i+2);
-            elemBuf.push_back(i+1);        
-            elemBuf.push_back(i);    
+                elemBuf.push_back(i+this->num_vertices_vert);
+                elemBuf.push_back(i+1);        
+                elemBuf.push_back(i);    
+            }
+        }
+
+        // creating upper right triangles
+        for (int i = this->num_vertices_vert+1; i < posBuf.size()/3; ++i) {
+            if (i % this->num_vertices_vert != 0) { // top row doesn't create triangles
+                elemBuf.push_back(i);
+                elemBuf.push_back(i-1);
+                elemBuf.push_back(i-this->num_vertices_vert);
+
+                elemBuf.push_back(i-this->num_vertices_vert);
+                elemBuf.push_back(i-1);        
+                elemBuf.push_back(i);    
+            }
         }
     }
-
-    // for (int i = 0; i < posBuf.size()/3 -3; i+=2) {
-    //     // elemBuf.push_back(i);
-    //     // elemBuf.push_back(i+2);
-    //     // elemBuf.push_back(i+3);
-     
-    //     // elemBuf.push_back(i+3);
-    //     // elemBuf.push_back(i+2);        
-    //     // elemBuf.push_back(i);   
-
-    //     // elemBuf.push_back(i+3); 
-    //     // elemBuf.push_back(i+2);
-    //     // elemBuf.push_back(i);
-
-    //     // elemBuf.push_back(i); 
-    //     // elemBuf.push_back(i+2);
-    //     // elemBuf.push_back(i+3);
-
-    // }
-
-
-    // size 8
-    // 0 1 2, 1 2 3, 2 3 4, 3 4 5, 4 5 6, 5 6 7 
-
-    // elemBuf.push_back(posBuf.size()/3 - 2);
-    // elemBuf.push_back(0);
-    // elemBuf.push_back(1);
-
-    // elemBuf.push_back(1);
-    // elemBuf.push_back(posBuf.size()/3 - 1);
-    // elemBuf.push_back(posBuf.size()/3 - 2);
-
-    // elemBuf.push_back(1);
-    // elemBuf.push_back(0);
-    // elemBuf.push_back(posBuf.size()/3 - 2);
-    
-    // elemBuf.push_back(posBuf.size()/3 - 2);
-    // elemBuf.push_back(posBuf.size()/3 - 1);
-    // elemBuf.push_back(1);
 
     // no shapes to loop because no groups object names
 }
@@ -229,11 +248,13 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     assert (num_bones != 0);
     this->num_bones = num_bones;
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
-    float seperation_ratio = float(num_bones + 1) / float((num_vertices/2) - 1);
+    float seperation_ratio = float(num_bones + 1) / float(num_vertices_horiz - 1);
     float bone_index, prev_bone, next_bone;
     cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
-    numInfl = std::vector<float>(this->num_vertices, 2);
+    float wei1, wei2, bon1, bon2;
+
+    numInfl = std::vector<float>(this->num_vertices_horiz * this->num_vertices_vert, 2);
 
     float x_location = -1 * width / 2.0;
     // cout << "bones at ";
@@ -245,7 +266,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     }
     bonLoc.push_back(dist_seperation); //FIXME: TESTING WITH ILLEGAL VALUE DONT MIND ME
     // cout << endl;
-    for (int i = 0; i < this->num_vertices/2; ++i) {
+    for (int i = 0; i < this->num_vertices_horiz; ++i) {
         // lower, then upper vertex
         
         // vertex location * ratio will give us the index of bone we are at
@@ -257,25 +278,36 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // edge cases - if an invisible bone is weighted, make it unimportant
         if (bone_index < 0) { // if using the first bone
         // cout << "first bone" << endl;
-            weiBuf.push_back(1); // ratio wrt distance
-            weiBuf.push_back(0); // "
-            bonBuf.push_back(0);
-            bonBuf.push_back(1);
-            weiBuf.push_back(1); // ratio wrt distance
-            weiBuf.push_back(0); // "
-            bonBuf.push_back(0);
-            bonBuf.push_back(1);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(0);
+            // bonBuf.push_back(1);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(0);
+            // bonBuf.push_back(1);
+
+            wei1 = 1;
+            wei2 = 0;
+            bon1 = 0;
+            bon2 = 0;
+
         }
         else if (bone_index > num_bones-1) { // if using the last 2 bones
         // cout << "last bone" <<endl;
-            weiBuf.push_back(1); // ratio wrt distance
-            weiBuf.push_back(0); // "
-            bonBuf.push_back(num_bones-1);
-            bonBuf.push_back(num_bones-2);
-            weiBuf.push_back(1); // ratio wrt distance
-            weiBuf.push_back(0); // "
-            bonBuf.push_back(num_bones-1);
-            bonBuf.push_back(num_bones-2);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(num_bones-1);
+            // bonBuf.push_back(num_bones-2);
+            // weiBuf.push_back(1); // ratio wrt distance
+            // weiBuf.push_back(0); // "
+            // bonBuf.push_back(num_bones-1);
+            // bonBuf.push_back(num_bones-2);
+
+            wei1 = 1;
+            wei2 = 0;
+            bon1 = num_bones-1;
+            bon2 = num_bones-2;
         }
         else 
         {
@@ -285,26 +317,42 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
 
             // if the two bones are the same, give a weight of 1
             if ((next_bone - prev_bone) < 0.001) {
-                weiBuf.push_back(1);
-                weiBuf.push_back(0);
-                weiBuf.push_back(1);
-                weiBuf.push_back(0);
+                // weiBuf.push_back(1);
+                // weiBuf.push_back(0);
+                // weiBuf.push_back(1);
+                // weiBuf.push_back(0);
                 // cout << "ok\t" << endl;
+
+                wei1 = 1;
+                wei2 = 0;
             }
             else {
-                weiBuf.push_back(next_bone - bone_index);
-                weiBuf.push_back(bone_index - prev_bone);
-                weiBuf.push_back(next_bone - bone_index);
-                weiBuf.push_back(bone_index - prev_bone);
-                cout << next_bone - bone_index << " ";
+                // weiBuf.push_back(next_bone - bone_index);
+                // weiBuf.push_back(bone_index - prev_bone);
+                // weiBuf.push_back(next_bone - bone_index);
+                // weiBuf.push_back(bone_index - prev_bone);
+                // cout << next_bone - bone_index << " ";
                 // cout << "nah\t";
+
+                wei1 = next_bone - bone_index;
+                wei2 = bone_index - prev_bone;
             }
-            bonBuf.push_back(next_bone);
-            bonBuf.push_back(prev_bone);
-            bonBuf.push_back(next_bone);
-            bonBuf.push_back(prev_bone);
+            // bonBuf.push_back(next_bone);
+            // bonBuf.push_back(prev_bone);
+            // bonBuf.push_back(next_bone);
+            // bonBuf.push_back(prev_bone);
+
+            bon1 = next_bone;
+            bon2 = prev_bone;
         }
         cout << prev_bone << " " << next_bone << endl;
+
+        for (int j = 0; j < this->num_vertices_vert; ++j) {
+            weiBuf.push_back(wei1);
+            weiBuf.push_back(wei2);
+            bonBuf.push_back(bon1);
+            bonBuf.push_back(bon2);
+        }
 
     }
 }
@@ -581,14 +629,14 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
         // quattrans2uqd
         glm::mat4 temp = howdy.at(bone1) * skin->getBind(bone1);
         glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
-        cout << "Vertex " << i << endl;
-        for (int a = 0; a < 4; ++a) {
-            for (int b = 0; b < 4; ++b) {
-                cout << temp[a][b] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
+        // cout << "Vertex " << i << endl;
+        // for (int a = 0; a < 4; ++a) {
+        //     for (int b = 0; b < 4; ++b) {
+        //         cout << temp[a][b] << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << endl;
         // cout << trans.x << " " << trans.y << " " << trans.z << endl;
         glm::quat rot = quat_cast(temp);
         QuatTrans2UDQ(-1, rot, trans);
@@ -606,9 +654,6 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
 
         // to ensure shortest path rotation
         if (glm::dot(r1, r2) < 0.0) {
-            if (i+1 == num_vertices || i+2 == num_vertices) {
-                cout << "flipped" << endl;
-            }
             r2 *= -1.0;
             d2 *= -1.0;
         }

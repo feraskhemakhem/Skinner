@@ -64,7 +64,8 @@ public:
 	
 private:
     int num_bones;
-    int num_vertices;
+    int num_vertices_horiz;
+    int num_vertices_vert;
     float dist_seperation;
 	std::shared_ptr<Program> prog;
 	std::vector<unsigned int> elemBuf; // index of vertex in triangular face (2 faces, 6)

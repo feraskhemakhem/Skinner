@@ -379,19 +379,15 @@ void render()
 
 int main(int argc, char **argv)
 {
-	// if(argc < 5) {
-	// 	cout << "Usage: ./A6 <NUM BONES> <NUM VERTICES> <RECT WIDTH> <RECT LENGTH>" << endl;
-	// 	return 0;
-	// }
 
 	// RESOURCE_DIR = argv[1] + string("/");
 	RESOURCE_DIR = "../resources/";
 	NUM_BONES = argc > 1 ? atoi(argv[1]) : 2;
 	NUM_VERTICES_HORIZ = argc > 2 ? atoi(argv[2]) : 4;
 	NUM_VERTICES_VERT = argc > 3 ? atoi(argv[3]) : 2;
-	RECT_WIDTH = argc > 4 ? atoi(argv[3]) : 20;
-	RECT_LENGTH = argc > 5 ? atoi(argv[4]) : 10;
-	TIMESCALE = argc > 6 ? (string(argv[5]) == "T" ? true : false) : false;
+	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
+	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
+	TIMESCALE = argc > 6 ? (string(argv[6]) == "T" ? true : false) : false;
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone
