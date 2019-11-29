@@ -205,7 +205,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // vertex location * ratio will give us the index of bone we are at
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
-        // bone_index = -1;
+        // bone_index = 1;
         cout << "bone index " << bone_index << endl;
 
         // edge cases - if an invisible bone is weighted, make it unimportant
@@ -473,11 +473,10 @@ glm::mat4 ShapeSkin::DQToMatrix(glm::quat Qr, glm::quat Qd)
 	return M;
 }
 
-void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
-
+void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) 
+{
     // https://www.cs.utah.edu/~ladislav/dq/dqs.cg - dqsAntipod
     glm::quat r, d;
-    // iterates all the vertices
 
     vector<glm::mat4> howdy;
     howdy.push_back(skin->getAnime(k, 0));
@@ -485,6 +484,7 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k) {
         howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
     }
 
+    // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
 
 

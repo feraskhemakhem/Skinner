@@ -25,7 +25,7 @@ Additional controls:
 * To rotate, hold mouse 1 + move mouse
 * Press 'w' to toggle wireframe (disabled by default)
 * Press 'b' to toggle bones (disabled by default)
-* Press 'c' to toggle culling (disabled by default)
+* Press 'c' to toggle culling (enabled by default)
 
 Notes on inputs:
 * All numeric values must be natural number (not including 0)

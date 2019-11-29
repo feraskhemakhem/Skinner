@@ -233,7 +233,7 @@ void render()
 	
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if(keyToggles[(unsigned)'c']) {
+	if(!keyToggles[(unsigned)'c']) {
 		glEnable(GL_CULL_FACE);
 	} else {
 		glDisable(GL_CULL_FACE);
