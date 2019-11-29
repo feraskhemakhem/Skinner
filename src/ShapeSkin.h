@@ -59,7 +59,7 @@ public:
 	void draw(bool b = false);
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
-    void skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor = 0);
+    void skinOn(std::shared_ptr<Skinner> skin, int k, float deform_factor = 0);
 
 
 	

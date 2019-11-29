@@ -15,7 +15,7 @@
 #include "GLSL.h"
 #include "Program.h"
 
-bool WIREFRAME = true;
+bool WIREFRAME = false;
 
 using namespace std;
 
@@ -110,25 +110,6 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
             norBuf.push_back(1); // y value always 1 for 2D normals
             norBuf.push_back(vertical_vertex_locations.at(i)); // precalculated z value
         }
-        // // add lower vertex
-        // posBuf.push_back(current_x);
-        // posBuf.push_back(0);
-        // posBuf.push_back(-1 * length / 2.0);
-
-        // // add lower normal
-        // norBuf.push_back(current_x);
-        // norBuf.push_back(1);
-        // norBuf.push_back(-1 * length / 2.0);
-
-        // // add upper vertex
-        // posBuf.push_back(current_x);
-        // posBuf.push_back(0);
-        // posBuf.push_back(length / 2.0);
-
-        // // add upper normal
-        // norBuf.push_back(current_x);
-        // norBuf.push_back(1);
-        // norBuf.push_back(length / 2.0);
         cout << current_x << " ";
 
         current_x += dist_seperation_horiz;
@@ -141,68 +122,23 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
 
     // TRIANGLES START
 
-    // add vertices that make up a face (first and last 2 vertices)
-    if (WIREFRAME) {
-        // for horizontal lines
-        for (int i = 0; i < posBuf.size()/3 - this->num_vertices_vert; ++i) { 
-            elemBuf.push_back(i);
-            elemBuf.push_back(i+this->num_vertices_vert);
-            
-            elemBuf.push_back(i+this->num_vertices_vert);        
-            elemBuf.push_back(i);      
-        }
-        cout << "i's" << endl;
+		// creating lower left triangles
+		for (int i = 0; i < posBuf.size()/3 - 1 - this->num_vertices_vert; ++i) { // additional -1 because of the we are using lower left corners
+				if ((i+1) % this->num_vertices_vert != 0) { // top row doesn't create triangles
+						elemBuf.push_back(i);
+						elemBuf.push_back(i+1);
+						elemBuf.push_back(i+this->num_vertices_vert);  
+				}
+		}
 
-        // for vertical lines
-        for (int i = 0; i < posBuf.size()/3 - 1; ++i) { 
-            if ((i+1) % this->num_vertices_vert != 0) { // eliminates diagonals
-                elemBuf.push_back(i+1);        
-                elemBuf.push_back(i); 
-
-                elemBuf.push_back(i);        
-                elemBuf.push_back(i+1); 
-            }
-        }
-
-        // for diagonal lines
-        for (int i = 1; i < posBuf.size()/3 - this->num_vertices_vert; ++i) {
-            if (i % this->num_vertices_vert != 0) {
-                elemBuf.push_back(i);
-                elemBuf.push_back(i+this->num_vertices_vert-1);
-
-                elemBuf.push_back(i+this->num_vertices_vert-1);
-                elemBuf.push_back(i);
-            }
-        }
-
-    }
-    else {
-        // creating lower left triangles
-        for (int i = 0; i < posBuf.size()/3 - 1 - this->num_vertices_vert; ++i) { // additional -1 because of the we are using lower left corners
-            if ((i+1) % this->num_vertices_vert != 0) { // top row doesn't create triangles
-                elemBuf.push_back(i);
-                elemBuf.push_back(i+1);
-                elemBuf.push_back(i+this->num_vertices_vert);
-
-                elemBuf.push_back(i+this->num_vertices_vert);
-                elemBuf.push_back(i+1);        
-                elemBuf.push_back(i);    
-            }
-        }
-
-        // creating upper right triangles
-        for (int i = this->num_vertices_vert+1; i < posBuf.size()/3; ++i) {
-            if (i % this->num_vertices_vert != 0) { // top row doesn't create triangles
-                elemBuf.push_back(i);
-                elemBuf.push_back(i-1);
-                elemBuf.push_back(i-this->num_vertices_vert);
-
-                elemBuf.push_back(i-this->num_vertices_vert);
-                elemBuf.push_back(i-1);        
-                elemBuf.push_back(i);    
-            }
-        }
-    }
+		// creating upper right triangles
+		for (int i = this->num_vertices_vert+1; i < posBuf.size()/3; ++i) {
+				if (i % this->num_vertices_vert != 0) { // top row doesn't create triangles
+						elemBuf.push_back(i);
+						elemBuf.push_back(i-1);
+						elemBuf.push_back(i-this->num_vertices_vert);
+				}
+		}
 
     // no shapes to loop because no groups object names
 }
@@ -257,15 +193,12 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     numInfl = std::vector<float>(this->num_vertices_horiz * this->num_vertices_vert, 2);
 
     float x_location = -1 * width / 2.0;
-    // cout << "bones at ";
     for (int i = 0; i < num_bones; ++i) {
         x_location += dist_seperation;
-        // cout << x_location << '\t';
         bonLoc.push_back(x_location);
         cout << "x_location " << x_location << endl;
     }
     bonLoc.push_back(dist_seperation); //FIXME: TESTING WITH ILLEGAL VALUE DONT MIND ME
-    // cout << endl;
     for (int i = 0; i < this->num_vertices_horiz; ++i) {
         // lower, then upper vertex
         
@@ -278,14 +211,6 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // edge cases - if an invisible bone is weighted, make it unimportant
         if (bone_index < 0) { // if using the first bone
         // cout << "first bone" << endl;
-            // weiBuf.push_back(1); // ratio wrt distance
-            // weiBuf.push_back(0); // "
-            // bonBuf.push_back(0);
-            // bonBuf.push_back(1);
-            // weiBuf.push_back(1); // ratio wrt distance
-            // weiBuf.push_back(0); // "
-            // bonBuf.push_back(0);
-            // bonBuf.push_back(1);
 
             wei1 = 1;
             wei2 = 0;
@@ -295,14 +220,6 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         }
         else if (bone_index > num_bones-1) { // if using the last 2 bones
         // cout << "last bone" <<endl;
-            // weiBuf.push_back(1); // ratio wrt distance
-            // weiBuf.push_back(0); // "
-            // bonBuf.push_back(num_bones-1);
-            // bonBuf.push_back(num_bones-2);
-            // weiBuf.push_back(1); // ratio wrt distance
-            // weiBuf.push_back(0); // "
-            // bonBuf.push_back(num_bones-1);
-            // bonBuf.push_back(num_bones-2);
 
             wei1 = 1;
             wei2 = 0;
@@ -317,31 +234,18 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
 
             // if the two bones are the same, give a weight of 1
             if ((next_bone - prev_bone) < 0.001) {
-                // weiBuf.push_back(1);
-                // weiBuf.push_back(0);
-                // weiBuf.push_back(1);
-                // weiBuf.push_back(0);
                 // cout << "ok\t" << endl;
 
                 wei1 = 1;
                 wei2 = 0;
             }
             else {
-                // weiBuf.push_back(next_bone - bone_index);
-                // weiBuf.push_back(bone_index - prev_bone);
-                // weiBuf.push_back(next_bone - bone_index);
-                // weiBuf.push_back(bone_index - prev_bone);
                 // cout << next_bone - bone_index << " ";
                 // cout << "nah\t";
 
                 wei1 = next_bone - bone_index;
                 wei2 = bone_index - prev_bone;
-            }
-            // bonBuf.push_back(next_bone);
-            // bonBuf.push_back(prev_bone);
-            // bonBuf.push_back(next_bone);
-            // bonBuf.push_back(prev_bone);
-
+						}
             bon1 = next_bone;
             bon2 = prev_bone;
         }
@@ -362,7 +266,6 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 {
     int nbones;
     nbones = this->num_bones;
-    // assert(bonLoc.size() == nbones);
 
     // read first line of points and quaternions
     glm::quat q; // quaternion
@@ -383,10 +286,6 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 
         // do not move, just rotate
         p.x = bonLoc.at(i);
-        // if (i==0)
-        //     p.x = bonLoc.at(i);
-        // else
-        //     p.x = bonLoc.at(bonLoc.size()-1);
         p.y = 0;
         p.z = 0;
 
@@ -435,10 +334,8 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
                 q = normalize(rotations.at(i-1) * q);
             rotations.push_back(q);
 
-            // cout << "q.w " << q.w << endl;
 
             // do not move, just rotate
-            // p.x = bonLoc.at(i);
             if (i == 0)
                 p.x = bonLoc.at(i);
             else
@@ -447,15 +344,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             p.z = 0;
             
             E[3] = glm::vec4(p, 1.0f);
-            if (i != 0)
-                E = skin->getAnime(j, i-1) * E;
             skin->addAnime(j, E);
-
-
-            // multiple bind with E and parents
-            // convert to quat and vec3
-            // quattrans2uqd
-
 
             if (i != 0)
                 p = translations.at(i-1) + p;
@@ -473,11 +362,11 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
 
     // heirarchy applied to bones
     assert(num_bones != 0);
-    // vector<glm::mat4> howdy;
-    // howdy.push_back(skin->getAnime(k, 0));
-    // for (int i = 1; i < num_bones; ++i) {
-    //     howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
-    // }
+    vector<glm::mat4> howdy;
+    howdy.push_back(skin->getAnime(k, 0));
+    for (int i = 1; i < num_bones; ++i) {
+        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+    }
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
@@ -488,27 +377,23 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k) {
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
 
-        
+				glm::mat4 temp (0.0f);
         // calculates skinned position and normal
         for (int j = 0; j < 2; ++j) {
 
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
 
-            glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-            dum1 = skin->getAnime(k, bone) * dum1;
-            // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+            // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+						glm::mat4 dum1 = skin->getBind(bone); // inverse bind matrix * initial vertex
+            dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
             dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
-            position = position + dum1;
-
-            // skinned normals
-            glm::vec4 dum2 = skin->getBind(bone) * y;
-            dum2 = skin->getAnime(k, bone) * dum2;
-            // dum2 = howdy.at(bone) * dum2;
-            dum2 = weiBuf.at(2*i+j) * dum2;
-            normal = normal + dum2;
-
+            // position = position + dum1;
+						temp += dum1;
         }
+
+				position = temp * x;
+				normal = temp * y;
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;
@@ -690,7 +575,7 @@ glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
 
         glm::mat4 dum1 = skin->getBind(bone);
         // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-        // dum1 = howdy.at(bone) * dum1; // inverse bind matrix * initial vertex
+        dum1 = bone_translation.at(bone) * dum1; // inverse bind matrix * initial vertex
         dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
 
         lbs_mat += dum1;
@@ -700,6 +585,7 @@ glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
 
 void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor) {
 
+	// cout << "deform is " << deform_factor << endl;
     // apply heirarchy of animations
     assert(num_bones != 0);
     bone_translation.clear();
@@ -719,7 +605,8 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_
 
         
         // calculates skinned position and normal with an interpolation of LBS and DQS
-        glm::mat4 interpol =(1-deform_factor) * LBS(skin, i) + deform_factor * DQS(skin, i);
+				glm::mat4 interpol = LBS(skin, i);
+        // glm::mat4 interpol = (1-deform_factor) * LBS(skin, i) + deform_factor * DQS(skin, i);
         position = interpol * x;
         normal = interpol * y;
         
@@ -846,10 +733,7 @@ void ShapeSkin::draw(bool b)
  
 	// Draw
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elemBufID);
-    if (WIREFRAME)
-	    glDrawElements(GL_LINES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
-    else
-        glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+		glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 
     if (b) {
         glDisableVertexAttribArray(h_wei0);

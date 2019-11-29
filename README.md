@@ -17,16 +17,15 @@ The project currenntly takes the following input to run:
 ./A6 [NUM BONES] [NUM VERTICES WIDE] [NUM VERTICES LONG] [RECT WIDTH] [RECT LENGTH] [ANIMATED? (T or F)]
 `
 
-These inputs respond to the folder where the shaders exist, the object being skinned, attachment file, and skeleton file. This input will
-change as the inputs are changed, and as the project is developed into a unique project.
+This input will change as the inputs are changed, and as the project is developed into a unique project.
+
+Additional controls:
+* To scale, hold cntrl + mouse 1 + move mouse
+* To translate, hold shift + mouse 1 + move mouse
+* To rotate, hold mouse 1 + move mouse
+* Press 'w' to toggle wireframe (disabled by default)
+* Press 'b' to toggle bones (disabled by default)
+* Press 'c' to toggle culling (disabled by default)
 
 Notes on inputs:
-* NUM BONES must be greater than 1
-* For odd values of NUM VERTICES, it will be replaced with the next largest even value
-* RECT WIDTH and RECT LENGTH must be positive
-
-In addition, to control the camera, use the following actions:
-
-* To scale, hold cntrl + move mouse
-* To translate, hold shift + move mouse
-* To rotate, just move mouse
+* All numeric values must be natural number (not including 0)

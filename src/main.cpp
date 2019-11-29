@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <cstdlib>
+#include <algorithm>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -33,7 +34,7 @@ int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
-bool LBS = true;
+bool LBS = false;
 bool TIMESCALE = true;
 
 shared_ptr<Camera> camera = NULL;
@@ -54,15 +55,19 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+	else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) { // GLFW_KEY_RIGHT
+		DEFORM_FACTOR = std::min(DEFORM_FACTOR+0.1f, 1.0f);
+		cout << "deform factor: " << DEFORM_FACTOR << endl;
+	}
+	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) { // GLFW_KEY_LEFT 
+		DEFORM_FACTOR = std::max(DEFORM_FACTOR-0.1f, 0.0f);
+		cout << "deform factor: " << DEFORM_FACTOR << endl;
+	}
 }
 
 static void char_callback(GLFWwindow *window, unsigned int key)
 {
 	keyToggles[key] = !keyToggles[key];
-	switch(key) {
-		case 'g':
-			break;
-	}
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xmouse, double ymouse)
@@ -233,7 +238,7 @@ void render()
 	} else {
 		glDisable(GL_CULL_FACE);
 	}
-	if(keyToggles[(unsigned)'z']) {
+	if(keyToggles[(unsigned)'w']) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} else {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -281,7 +286,7 @@ void render()
 	else
 		// timeScale = 420;
     timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
-    if(!keyToggles[(unsigned)'b']) {
+    if(keyToggles[(unsigned)'b']) {
         // dra	ng bones
         float boneScale = 0.25f; // determines the size of the bones
 				assert(NUM_BONES > 0);
@@ -291,8 +296,8 @@ void render()
         for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
             MV->pushMatrix();
 						howdy = howdy * walker->getAnime(timeScale, i);
-            // MV->multMatrix(walker->getAnime(timeScale, i)); // animation acts wrt base frame
-						MV->multMatrix(walker->getAnime(timeScale, i));
+            MV->multMatrix(howdy); // animation acts wrt base frame
+						// MV->multMatrix(walker->getAnime(timeScale, i));
             glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
             glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
             glLineWidth(2);
@@ -330,7 +335,7 @@ void render()
 
 		// apply skin
 		if (LBS)
-			shape->LBSskinOn(walker, timeScale);
+			shape->skinOn(walker, timeScale, DEFORM_FACTOR);
 		else
 			shape->DQSskinOn(walker, timeScale);
 
