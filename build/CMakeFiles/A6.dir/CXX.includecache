@@ -125,6 +125,8 @@ memory
 -
 cstdlib
 -
+algorithm
+-
 GL/glew.h
 -
 GLFW/glfw3.h
