@@ -34,6 +34,7 @@ int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
+double t;
 
 shared_ptr<Camera> camera = NULL;
 shared_ptr<ShapeSkin> shape = NULL;
@@ -66,6 +67,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 static void char_callback(GLFWwindow *window, unsigned int key)
 {
 	keyToggles[key] = !keyToggles[key];
+	if (key == 'a') {
+		t -= 0.3;
+	}
+	else if (key == 'd') {
+		t += 0.3;
+	}
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xmouse, double ymouse)
@@ -218,7 +225,7 @@ void init()
 void render()
 {
 	// Update time.
-	double t = glfwGetTime();
+	// double t = glfwGetTime();
 
 	// Get current frame buffer size.
 	int width, height;
@@ -276,10 +283,9 @@ void render()
 		glVertex3f(-gridSizeHalf, 0, z);
 		glVertex3f( gridSizeHalf, 0, z);
 	}
-
 	glEnd();
 	int timeScale;
-	timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
+	timeScale = (int)(t*4); // determines the relative speed of cheb
 	if(keyToggles[(unsigned)'b']) {
 		// dra	ng bones
 		float boneScale = 0.25f; // determines the size of the bones
@@ -328,10 +334,11 @@ void render()
 		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
 		// apply skin
-		if (DEFORM_FACTOR == 0)
-			shape->skinOn(walker, timeScale, DEFORM_FACTOR);
-		else
-			shape->DQSskinOn(walker, timeScale);
+		// if (DEFORM_FACTOR == 0)
+		// 	shape->skinOn(walker, timeScale, DEFORM_FACTOR);
+		// else
+		// 	shape->DQSskinOn(walker, timeScale);
+		shape->skinOn(walker, timeScale, DEFORM_FACTOR);
 
 		shape->setProgram(progSkin);
 		shape->draw();
