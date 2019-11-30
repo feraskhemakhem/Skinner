@@ -112,8 +112,8 @@ private:
     glm::mat4 DQToMatrix(glm::quat Qr, glm::quat Qd);
 
     // general helper functions
-    glm::mat4 DQS(std::shared_ptr<Skinner> skin, int vertex);
-    glm::mat4 LBS(std::shared_ptr<Skinner> skin, int vertex);
+    glm::mat4 DQS(std::shared_ptr<Skinner> skin, int vertex, int k);
+    glm::mat4 LBS(std::shared_ptr<Skinner> skin, int vertex, int k);
 };
 
 #endif

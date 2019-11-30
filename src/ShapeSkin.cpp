@@ -376,7 +376,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             //     q.y = 0;
             //     q.w = 1;
             // }
-            // else if (i == 0) { // first bone
+            // if (i == 0) { // first bone
             //     q.y = sin(PI / 144 * j);
             //     q.w = cos(PI / 144 * j);
             // }    
@@ -433,11 +433,11 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k)
 
     // heirarchy applied to bones
     assert(num_bones != 0);
-    vector<glm::mat4> howdy;
-    // howdy.push_back(skin->getAnime(k, 0));
-    // for (int i = 1; i < num_bones; ++i) {
-    //     howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
-    // }
+    // vector<glm::mat4> howdy;
+    // // howdy.push_back(skin->getAnime(k, 0));
+    // // for (int i = 1; i < num_bones; ++i) {
+    // //     howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+    // // }
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
@@ -448,32 +448,32 @@ void ShapeSkin::LBSskinOn (std::shared_ptr<Skinner> skin, int k)
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
 
-        // glm::mat4 temp (0.0f);
+        glm::mat4 temp (0.0f);
         // calculates skinned position and normal
         for (int j = 0; j < 2; ++j) {
 
             // i is vertex, j is bone, k is time
             int bone = bonBuf.at(2*i+j);
 
-            glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-            // glm::mat4 dum1 = skin->getBind(bone); // inverse bind matrix * initial vertex
+            // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            glm::mat4 dum1 = skin->getBind(bone); // inverse bind matrix * initial vertex
             // dum1 = howdy.at(bone) * dum1; // animation
             dum1 = skin->getAnime(k,bone) * dum1; // animation
             dum1 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
-            position = position + dum1;
-            // temp += dum1;
+            // position = position + dum1;
+            temp += dum1;
 
-            glm::vec4 dum2 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-            // glm::mat4 dum2 = skin->getBind(bone); // inverse bind matrix * initial vertex
-            // dum2 = howdy.at(bone) * dum1; // animation
-            dum2 = skin->getAnime(k,bone) * dum1; // animation
-            dum2 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
-            normal = normal + dum1;
+            // glm::vec4 dum2 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+            // // glm::mat4 dum2 = skin->getBind(bone); // inverse bind matrix * initial vertex
+            // // dum2 = howdy.at(bone) * dum1; // animation
+            // dum2 = skin->getAnime(k,bone) * dum1; // animation
+            // dum2 = weiBuf.at(2*i+j) * dum1; // apply weight of ith vertex on jth bone
+            // normal = normal + dum1;
             // temp += dum1;
         }
 
-        // position = temp * x;
-        // normal = temp * y;
+        position = temp * x;
+        normal = temp * y;
         
         // adjusts values of position and normal respectively
         skinnedPos.at(3*i) = position.x;
@@ -558,65 +558,65 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k)
     // cout << "DQS CALLED" << endl;
 
     // https://www.cs.utah.edu/~ladislav/dq/dqs.cg - dqsAntipod
-    glm::quat r, d;
+    // glm::quat r, d;
 
-		bone_translation.clear();
-    bone_translation.push_back(skin->getAnime(k, 0));
-    for (int i = 1; i < num_bones; ++i) {
-        bone_translation.push_back(bone_translation.at(i-1) * skin->getAnime(k,i));
-    }
+	// bone_translation.clear();
+    // bone_translation.push_back(skin->getAnime(k, 0));
+    // for (int i = 1; i < num_bones; ++i) {
+    //     bone_translation.push_back(bone_translation.at(i-1) * skin->getAnime(k,i));
+    // }
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
 
-        int bone1 = bonBuf.at(2*i);
-        int bone2 = bonBuf.at(2*i+1);
+        // int bone1 = bonBuf.at(2*i);
+        // int bone2 = bonBuf.at(2*i+1);
 
-        // cout << i << " " << bone1 << " " << weiBuf.at(2*i) << " " << bone2 << " " << weiBuf.at(2*i+1) << endl;
+        // // cout << i << " " << bone1 << " " << weiBuf.at(2*i) << " " << bone2 << " " << weiBuf.at(2*i+1) << endl;
 
-        // glm::quat r1 = glm::conjugate(GetReal(0, bone1)) * GetReal(k+1, bone1);
-        // glm::quat d1 = glm::conjugate(GetDual(0, bone1)) * GetDual(k+1, bone1);
-        // glm::quat r2 = glm::conjugate(GetReal(0, bone2)) * GetReal(k+1, bone2);
-        // glm::quat d2 = glm::conjugate(GetDual(0, bone2)) * GetDual(k+1, bone2);
+        // // glm::quat r1 = glm::conjugate(GetReal(0, bone1)) * GetReal(k+1, bone1);
+        // // glm::quat d1 = glm::conjugate(GetDual(0, bone1)) * GetDual(k+1, bone1);
+        // // glm::quat r2 = glm::conjugate(GetReal(0, bone2)) * GetReal(k+1, bone2);
+        // // glm::quat d2 = glm::conjugate(GetDual(0, bone2)) * GetDual(k+1, bone2);
 
-        // multiple bind with E and parents
-        // convert to quat and vec3
-        // quattrans2uqd
-        glm::mat4 temp = bone_translation.at(bone1) * skin->getBind(bone1);
-        glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
-        // cout << trans.x << " " << trans.y << " " << trans.z << endl;
-        glm::quat rot = quat_cast(temp);
-        QuatTrans2UDQ(-1, rot, trans);
+        // // multiple bind with E and parents
+        // // convert to quat and vec3
+        // // quattrans2uqd
+        // // glm::mat4 temp = bone_translation.at(bone1) * skin->getBind(bone1);
+        // glm::mat4 temp = skin->getAnime(k, bone1) * skin->getBind(bone1);
+        // glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
+        // // cout << trans.x << " " << trans.y << " " << trans.z << endl;
+        // glm::quat rot = quat_cast(temp);
+        // QuatTrans2UDQ(-1, rot, trans);
         
-        temp = bone_translation.at(bone2) * skin->getBind(bone2);
-        trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
-        rot = quat_cast(temp);
-        QuatTrans2UDQ(-2, rot, trans);
+        // temp = skin->getAnime(k, bone2) * skin->getBind(bone2);
+        // // temp = bone_translation.at(bone2) * skin->getBind(bone2);
+        // trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
+        // rot = quat_cast(temp);
+        // QuatTrans2UDQ(-2, rot, trans);
 
-				LBS(skin, i);
         
-        // glm::quat r1 = GetReal(k+1, bone1);
-        // glm::quat d1 = GetDual(k+1, bone1);
-        // glm::quat r2 = GetReal(k+1, bone2);
-        // glm::quat d2 = GetDual(k+1, bone2);
+        // // glm::quat r1 = GetReal(k+1, bone1);
+        // // glm::quat d1 = GetDual(k+1, bone1);
+        // // glm::quat r2 = GetReal(k+1, bone2);
+        // // glm::quat d2 = GetDual(k+1, bone2);
 
 
-        // to ensure shortest path rotation
-        if (glm::dot(r1, r2) < 0.0) {
-            r2 *= -1.0;
-            d2 *= -1.0;
-        }
+        // // to ensure shortest path rotation
+        // if (glm::dot(r1, r2) < 0.0) {
+        //     r2 *= -1.0;
+        //     d2 *= -1.0;
+        // }
 
-        // apply weights
-        // bone 1
-        r = weiBuf.at(2*i) * r1;
-        d = weiBuf.at(2*i) * d1;
-        // bone 2
-        r += weiBuf.at(2*i+1) * r2;
-        d += weiBuf.at(2*i+1) * d2;
+        // // apply weights
+        // // bone 1
+        // r = weiBuf.at(2*i) * r1;
+        // d = weiBuf.at(2*i) * d1;
+        // // bone 2
+        // r += weiBuf.at(2*i+1) * r2;
+        // d += weiBuf.at(2*i+1) * d2;
 
-        // glm::mat4 trans_mat = (skin->getBind(bone1)*weiBuf.at(2*i) + skin->getBind(bone2)*weiBuf.at(2*i+1)) * DQToMatrix(r, d);
-        glm::mat4 trans_mat = DQToMatrix(r, d);
+        glm::mat4 trans_mat = DQS(skin, i, k);
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
 
@@ -647,26 +647,57 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k)
     }
 }
 
-glm::mat4 ShapeSkin::DQS(std::shared_ptr<Skinner> skin, int vertex) {
-    glm::mat4 k(1.0f);
-    return k;
+glm::mat4 ShapeSkin::DQS(std::shared_ptr<Skinner> skin, int vertex, int k) {
+    glm::quat r, d;
+    int bone1 = bonBuf.at(2*vertex);
+    int bone2 = bonBuf.at(2*vertex+1);
+
+    // multiple bind with E and parents
+    // convert to quat and vec3
+    // quattrans2uqd
+    glm::mat4 temp = skin->getAnime(k, bone1) * skin->getBind(bone1);
+    glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
+    glm::quat rot = quat_cast(temp);
+    QuatTrans2UDQ(-1, rot, trans); // saves to r1, d1
+    
+    temp = skin->getAnime(k, bone2) * skin->getBind(bone2);
+    trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
+    rot = quat_cast(temp);
+    QuatTrans2UDQ(-2, rot, trans); // saves to r2, d2
+
+    // to ensure shortest path rotation
+    if (glm::dot(r1, r2) < 0.0) {
+        r2 *= -1.0;
+        d2 *= -1.0;
+    }
+
+    // apply weights
+    // bone 1
+    r = weiBuf.at(2*vertex) * r1;
+    d = weiBuf.at(2*vertex) * d1;
+    // bone 2
+    r += weiBuf.at(2*vertex+1) * r2;
+    d += weiBuf.at(2*vertex+1) * d2;
+
+    glm::mat4 trans_mat = DQToMatrix(r, d);
+    return trans_mat;
 }
 
-glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
+glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex, int k) {
 	// calculates skinned position and normal
 	glm::mat4 lbs_mat(0.0f);
 	for (int j = 0; j < 2; ++j) {
 
-			// i is vertex, j is bone, k is time
-			int bone = bonBuf.at(2*vertex+j);
+        // i is vertex, j is bone, k is time
+        int bone = bonBuf.at(2*vertex+j);
 
-			glm::mat4 dum1 = skin->getBind(bone);
-			// glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-			dum1 = bone_translation.at(bone) * dum1; // inverse bind matrix * initial vertex
-			dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
+        glm::mat4 dum1 = skin->getBind(bone);
+        dum1 = skin->getAnime(k, bone) * dum1; // inverse bind matrix * initial vertex
+        // dum1 = bone_translation.at(bone) * dum1; // inverse bind matrix * initial vertex
+        dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
 
-			lbs_mat += dum1;
-	}
+        lbs_mat += dum1;
+    }
 	// if (vertex == 8 || vertex == 9) {
 	// 	cout << "LBS at " << vertex << endl;
 	// 	for (int a = 0; a < 4; ++a) {
@@ -704,8 +735,8 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_
 
         
         // calculates skinned position and normal with an interpolation of LBS and DQS
-				glm::mat4 interpol = LBS(skin, i);
-        // glm::mat4 interpol = (1-deform_factor) * LBS(skin, i) + deform_factor * DQS(skin, i);
+				// glm::mat4 interpol = LBS(skin, i, k);
+        glm::mat4 interpol = (1-deform_factor) * LBS(skin, i, k) + deform_factor * DQS(skin, i, k);
         position = interpol * x;
         normal = interpol * y;
         

@@ -334,11 +334,12 @@ void render()
 		glUniform1f(progSkin->getUniform("s"), 200.0f);
 		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
-		// apply skin
-		if (DEFORM_FACTOR == 0)
-			shape->LBSskinOn(walker, timeScale);
-		else
-			shape->DQSskinOn(walker, timeScale);
+		// // apply skin
+		// if (DEFORM_FACTOR == 0)
+		// 	shape->LBSskinOn(walker, timeScale);
+		// else
+		// 	shape->DQSskinOn(walker, timeScale);
+		shape->skinOn(walker, timeScale, DEFORM_FACTOR);
 
 		shape->setProgram(progSkin);
 		shape->draw();
