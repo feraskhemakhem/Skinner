@@ -263,8 +263,8 @@ void render()
 	glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
 	glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 	float gridSizeHalf = 5.0f;
-	int gridNx = 11;
-	int gridNz = 11;
+	int gridNx = 20;
+	int gridNz = 20;
 	glLineWidth(1);
 	glColor3f(0.8f, 0.8f, 0.8f);
 	glBegin(GL_LINES);

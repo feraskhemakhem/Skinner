@@ -372,11 +372,11 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 
             //https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
             q.x = 0;
-            if (i == nbones-1) { // last bone
-                q.y = 0;
-                q.w = 1;
-            }
-            else if (i == 0) {
+            // if (i == nbones-1) { // last bone
+            //     q.y = 0;
+            //     q.w = 1;
+            // }
+            if (i == 0) {
                 q.y = -1*sin(PI / 144 * j);
                 q.w = cos(PI / 144 * j);
             }    
