@@ -34,6 +34,7 @@ int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
+double t = 0.0;
 
 shared_ptr<Camera> camera = NULL;
 shared_ptr<ShapeSkin> shape = NULL;
@@ -66,6 +67,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 static void char_callback(GLFWwindow *window, unsigned int key)
 {
 	keyToggles[key] = !keyToggles[key];
+	if (key == 'd') {
+		t += 0.3;
+	}
+	else if (key == 'a') {
+		t -= 0.3;
+	}
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xmouse, double ymouse)
@@ -218,7 +225,7 @@ void init()
 void render()
 {
 	// Update time.
-	double t = glfwGetTime();
+	// double t = glfwGetTime();
 
 	// Get current frame buffer size.
 	int width, height;
@@ -279,7 +286,7 @@ void render()
 
 	glEnd();
 	int timeScale;
-	timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
+	timeScale = (int)(t*NUM_BONES); // determines the relative speed of cheb
 	if(keyToggles[(unsigned)'b']) {
 		// dra	ng bones
 		float boneScale = 0.25f; // determines the size of the bones
@@ -290,8 +297,8 @@ void render()
 		for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
 				MV->pushMatrix();
 				howdy = howdy * walker->getAnime(timeScale, i);
-				MV->multMatrix(howdy); // animation acts wrt base frame
-				// MV->multMatrix(walker->getAnime(timeScale, i));
+				// MV->multMatrix(howdy); // animation acts wrt base frame
+				MV->multMatrix(walker->getAnime(timeScale, i));
 				glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
 				glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 				glLineWidth(2);
@@ -329,7 +336,7 @@ void render()
 
 		// apply skin
 		if (DEFORM_FACTOR == 0)
-			shape->skinOn(walker, timeScale, DEFORM_FACTOR);
+			shape->LBSskinOn(walker, timeScale);
 		else
 			shape->DQSskinOn(walker, timeScale);
 
