@@ -14,7 +14,7 @@ To compile the project:
 The project currenntly takes the following input to run:
 
 `
-./A6 [NUM BONES] [NUM VERTICES WIDE] [NUM VERTICES LONG] [RECT WIDTH] [RECT LENGTH] [ANIMATED? (T or F)]
+./A6 [NUM BONES] [NUM VERTICES WIDE] [NUM VERTICES LONG] [RECT WIDTH] [RECT LENGTH] [DEFORM FACTOR]
 `
 
 This input will change as the inputs are changed, and as the project is developed into a unique project.

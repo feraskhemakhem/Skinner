@@ -34,8 +34,6 @@ int RECT_LENGTH = 10;
 int RECT_WIDTH = 20;
 float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
-bool LBS = false;
-bool TIMESCALE = true;
 
 shared_ptr<Camera> camera = NULL;
 shared_ptr<ShapeSkin> shape = NULL;
@@ -281,40 +279,36 @@ void render()
 
 	glEnd();
 	int timeScale;
-	if (!TIMESCALE)
-		timeScale = 0;
-	else
-		// timeScale = 420;
-    timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
-    if(keyToggles[(unsigned)'b']) {
-        // dra	ng bones
-        float boneScale = 0.25f; // determines the size of the bones
-				assert(NUM_BONES > 0);
-				// draw_bone(0, boneScale, timeScale, MV, P);	
-	  		mat4 howdy = mat4(1.0);
+	timeScale = (int)(t/2*NUM_BONES); // determines the relative speed of cheb
+	if(keyToggles[(unsigned)'b']) {
+		// dra	ng bones
+		float boneScale = 0.25f; // determines the size of the bones
+		assert(NUM_BONES > 0);
+		// draw_bone(0, boneScale, timeScale, MV, P);	
+		mat4 howdy = mat4(1.0);
 
-        for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
-            MV->pushMatrix();
-						howdy = howdy * walker->getAnime(timeScale, i);
-            MV->multMatrix(howdy); // animation acts wrt base frame
-						// MV->multMatrix(walker->getAnime(timeScale, i));
-            glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-            glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            glColor3f(1, 0, 0);
-            glVertex3f(0, 0, 0);
-            glVertex3f(boneScale, 0, 0);
-            glColor3f(0, 1, 0);
-            glVertex3f(0, 0, 0);
-            glVertex3f(0, boneScale, 0);
-            glColor3f(0, 0, 1);
-            glVertex3f(0, 0, 0);
-            glVertex3f(0, 0, boneScale);
-            glEnd();
-            MV->popMatrix();
-						// pog *= walker->getBind(i);
-        }
+		for (int i = 0; i < NUM_BONES; ++i) { // for NUM_BONES bones
+				MV->pushMatrix();
+				howdy = howdy * walker->getAnime(timeScale, i);
+				MV->multMatrix(howdy); // animation acts wrt base frame
+				// MV->multMatrix(walker->getAnime(timeScale, i));
+				glUniformMatrix4fv(progSimple->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+				glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+				glLineWidth(2);
+				glBegin(GL_LINES);
+				glColor3f(1, 0, 0);
+				glVertex3f(0, 0, 0);
+				glVertex3f(boneScale, 0, 0);
+				glColor3f(0, 1, 0);
+				glVertex3f(0, 0, 0);
+				glVertex3f(0, boneScale, 0);
+				glColor3f(0, 0, 1);
+				glVertex3f(0, 0, 0);
+				glVertex3f(0, 0, boneScale);
+				glEnd();
+				MV->popMatrix();
+				// pog *= walker->getBind(i);
+			}
     }		
 
     progSimple->unbind();
@@ -334,7 +328,7 @@ void render()
 		glUniform3f(progSkin->getUniform("ka"), 0.4f, 0.4f, 0.4f); // ambient colour (rgb)
 
 		// apply skin
-		if (LBS)
+		if (DEFORM_FACTOR == 0)
 			shape->skinOn(walker, timeScale, DEFORM_FACTOR);
 		else
 			shape->DQSskinOn(walker, timeScale);
@@ -362,8 +356,7 @@ int main(int argc, char **argv)
 	NUM_VERTICES_VERT = argc > 3 ? atoi(argv[3]) : 2;
 	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
 	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
-	TIMESCALE = argc > 6 ? (string(argv[6]) == "T" ? true : false) : false;
-	DEFORM_FACTOR = argc > 7 ? atoi(argv[7]) : 0.5;
+	DEFORM_FACTOR = argc > 6 ? atoi(argv[6]) : 0.5;
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone

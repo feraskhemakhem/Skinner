@@ -73,6 +73,8 @@ void ShapeSkin::loadMesh(const string &meshName)
 }
 
 void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_vert, const int length, const int width) {
+
+	cout << "vertices are " << num_vertices_horiz << " x " << num_vertices_vert << endl;
     // determine how much to seperate each vertex, and the set points
     float dist_seperation_horiz = (float)width / (num_vertices_horiz - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
     float dist_seperation_vert = (float)length / (num_vertices_vert - 1);
@@ -249,8 +251,9 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             bon1 = next_bone;
             bon2 = prev_bone;
         }
-        cout << prev_bone << " " << next_bone << endl;
-
+        // cout << prev_bone << " " << next_bone << endl;
+				cout << wei1 << " for bone " << bon1 << " and " << wei2 << " for bone " << bon2 << endl;
+  
         for (int j = 0; j < this->num_vertices_vert; ++j) {
             weiBuf.push_back(wei1);
             weiBuf.push_back(wei2);
@@ -259,6 +262,68 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         }
 
     }
+		// 	for (int i = 0; i < this->num_vertices_horiz/2; ++i) {
+    //     // lower, then upper vertex
+        
+    //     // vertex location * ratio will give us the index of bone we are at
+    //     // +1 to make up for index, and -2 because the first bone is at index 1
+    //     bone_index = (i * seperation_ratio) - 1;
+    //     bone_index = -1;
+    //     cout << "bone index " << bone_index << endl;
+
+    //     // edge cases - if an invisible bone is weighted, make it unimportant
+    //     if (bone_index < 0) { // if using the first bone
+    //     // cout << "first bone" << endl;
+    //         weiBuf.push_back(1); // ratio wrt distance
+    //         weiBuf.push_back(0); // "
+    //         bonBuf.push_back(0);
+    //         bonBuf.push_back(1);
+    //         weiBuf.push_back(1); // ratio wrt distance
+    //         weiBuf.push_back(0); // "
+    //         bonBuf.push_back(0);
+    //         bonBuf.push_back(1);
+    //     }
+    //     else if (bone_index > num_bones-1) { // if using the last 2 bones
+    //     // cout << "last bone" <<endl;
+    //         weiBuf.push_back(1); // ratio wrt distance
+    //         weiBuf.push_back(0); // "
+    //         bonBuf.push_back(num_bones-1);
+    //         bonBuf.push_back(num_bones-2);
+    //         weiBuf.push_back(1); // ratio wrt distance
+    //         weiBuf.push_back(0); // "
+    //         bonBuf.push_back(num_bones-1);
+    //         bonBuf.push_back(num_bones-2);
+    //     }
+    //     else 
+    //     {
+    //         // cout << bone_index << " is bone index\t";
+    //         prev_bone = floor(bone_index);
+    //         next_bone = ceil(bone_index);
+
+    //         // if the two bones are the same, give a weight of 1
+    //         if ((next_bone - prev_bone) < 0.001) {
+    //             weiBuf.push_back(1);
+    //             weiBuf.push_back(0);
+    //             weiBuf.push_back(1);
+    //             weiBuf.push_back(0);
+    //             // cout << "ok\t" << endl;
+    //         }
+    //         else {
+    //             weiBuf.push_back(next_bone - bone_index);
+    //             weiBuf.push_back(bone_index - prev_bone);
+    //             weiBuf.push_back(next_bone - bone_index);
+    //             weiBuf.push_back(bone_index - prev_bone);
+    //             cout << next_bone - bone_index << " ";
+    //             // cout << "nah\t";
+    //         }
+    //         bonBuf.push_back(next_bone);
+    //         bonBuf.push_back(prev_bone);
+    //         bonBuf.push_back(next_bone);
+    //         bonBuf.push_back(prev_bone);
+    //     }
+    //     cout << prev_bone << " " << next_bone << endl;
+
+    // }
 }
 
 // this is the animation that the vertices do, in x y z format
@@ -413,12 +478,18 @@ void ShapeSkin::QuatTrans2UDQ(int j, const glm::quat& r, const glm::vec3& t)
 {
     glm::quat real, dual;
     // non-dual part (just copy q0):
-    real = r;
+    real = normalize(r);
     // dual part: https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
-    dual.w = -0.5*(t.x*r.x + t.y*r.y + t.z*r.z);
-    dual.x = 0.5*( t.x*r.w + t.y*r.z - t.z*r.y);
-    dual.y = 0.5*(-t.x*r.z + t.y*r.w + t.z*r.x);
-    dual.z = 0.5*( t.x*r.y - t.y*r.x + t.z*r.w);
+    // dual.w = -0.5*(t.x*r.x + t.y*r.y + t.z*r.z);
+    // dual.x = 0.5*( t.x*r.w + t.y*r.z - t.z*r.y);
+    // dual.y = 0.5*(-t.x*r.z + t.y*r.w + t.z*r.x);
+    // dual.z = 0.5*( t.x*r.y - t.y*r.x + t.z*r.w);
+		dual.w = 0;
+		dual.x = t.x;
+		dual.y = t.y;
+		dual.z = t.z;
+
+		dual = dual * real * 0.5f;
 
     if (j == -1) {
         r1 = real;
@@ -427,7 +498,7 @@ void ShapeSkin::QuatTrans2UDQ(int j, const glm::quat& r, const glm::vec3& t)
     }
     else if (j == -2) {
         r2 = real;
-        d2= real;
+        d2 = dual;
         return;
     }
     addDQ(j, real, dual);
@@ -444,30 +515,24 @@ glm::mat4 ShapeSkin::DQToMatrix(glm::quat Qr, glm::quat Qd)
 {	
 	glm::mat4 M;
 	float len2 = glm::dot(Qr, Qr);
-	float w = Qr.x, x = Qr.y, y = Qr.z, z = Qr.w;
-	float t0 = Qd.x, t1 = Qd.y, t2 = Qd.z, t3 = Qd.w;
+	// cout << len2 << endl;
+	// float w = Qr.x, x = Qr.y, y = Qr.z, z = Qr.w;
+	float w = Qr.w, x = Qr.x, y = Qr.y, z = Qr.z;
+
 
     // cout << "DQToMatrix " << len2 << " " << Qr.w << " " << Qr.x << " " << Qr.y << " " << Qr.z << endl;
     
     // https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf - pg 9
-	M[0][0] = w*w + x*x - y*y - z*z; M[0][1] = 2*x*y - 2*w*z; M[0][2] = 2*x*z + 2*w*y;
-	M[1][0] = 2*x*y + 2*w*z; M[1][1] = w*w + y*y - x*x - z*z; M[1][2] = 2*y*z - 2*w*x; 
-	M[2][0] = 2*x*z - 2*w*y; M[2][1] = 2*y*z + 2*w*x; M[2][2] = w*w + z*z - x*x - y*y;
-	
-    glm::quat t = Qd * 2.0f * glm::conjugate(Qr);
-	// M[3][0] = -2*t0*x + 2*w*t1 - 2*t2*z + 2*y*t3;
-	// M[3][1] = -2*t0*y + 2*t1*z - 2*x*t3 + 2*w*t2;
-	// M[3][2] = -2*t0*z + 2*x*t2 + 2*w*t3 - 2*t1*y;
-    M[3][0] = t.x;
+	M[0][0] = w*w + x*x - y*y - z*z; M[0][1] = 2*x*y + 2*w*z; M[0][2] = 2*x*z - 2*w*y;
+	M[1][0] = 2*x*y - 2*w*z; M[1][1] = w*w + y*y - x*x - z*z; M[1][2] = 2*y*z + 2*w*x; 
+	M[2][0] = 2*x*z + 2*w*y; M[2][1] = 2*y*z - 2*w*x; M[2][2] = w*w + z*z - x*x - y*y;
+
+  glm::quat t = Qd * 2.0f * glm::conjugate(Qr);
+  M[3][0] = t.x;
 	M[3][1] = t.y;
 	M[3][2] = t.z;
-    // M[0][3] = t.x;
-	// M[0][3] = t.y;
-	// M[0][3] = t.z;
-    // cout << M[0][3] << "\t";
 
 	M /= len2;
-    // cout << M[0][3] << endl;
 
 	
 	return M;
@@ -478,15 +543,14 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k)
     // https://www.cs.utah.edu/~ladislav/dq/dqs.cg - dqsAntipod
     glm::quat r, d;
 
-    vector<glm::mat4> howdy;
-    howdy.push_back(skin->getAnime(k, 0));
+		bone_translation.clear();
+    bone_translation.push_back(skin->getAnime(k, 0));
     for (int i = 1; i < num_bones; ++i) {
-        howdy.push_back(howdy.at(i-1) * skin->getAnime(k,i));
+        bone_translation.push_back(bone_translation.at(i-1) * skin->getAnime(k,i));
     }
 
     // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
-
 
         int bone1 = bonBuf.at(2*i);
         int bone2 = bonBuf.at(2*i+1);
@@ -501,24 +565,18 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k)
         // multiple bind with E and parents
         // convert to quat and vec3
         // quattrans2uqd
-        glm::mat4 temp = howdy.at(bone1) * skin->getBind(bone1);
+        glm::mat4 temp = bone_translation.at(bone1) * skin->getBind(bone1);
         glm::vec3 trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
-        // cout << "Vertex " << i << endl;
-        // for (int a = 0; a < 4; ++a) {
-        //     for (int b = 0; b < 4; ++b) {
-        //         cout << temp[a][b] << " ";
-        //     }
-        //     cout << endl;
-        // }
-        // cout << endl;
         // cout << trans.x << " " << trans.y << " " << trans.z << endl;
         glm::quat rot = quat_cast(temp);
         QuatTrans2UDQ(-1, rot, trans);
         
-        temp = howdy.at(bone2) * skin->getBind(bone2);
-        trans = glm::vec3(temp[0][3], temp[1][3], temp[2][3]);
+        temp = bone_translation.at(bone2) * skin->getBind(bone2);
+        trans = glm::vec3(temp[3][0], temp[3][1], temp[3][2]);
         rot = quat_cast(temp);
         QuatTrans2UDQ(-2, rot, trans);
+
+				LBS(skin, i);
         
         // glm::quat r1 = GetReal(k+1, bone1);
         // glm::quat d1 = GetDual(k+1, bone1);
@@ -545,6 +603,18 @@ void ShapeSkin::DQSskinOn(std::shared_ptr<Skinner> skin, int k)
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
 
+        // if (i == 8 || i == 9) {
+        //     cout << "DQS " << i << endl;
+        //     cout << weiBuf.at(2*i) << " " << weiBuf.at(2*i+1) << endl;
+        //     for (int a = 0; a < 4; ++a) {
+        //             for (int b = 0; b < 4; ++b) {
+        //                     cout << trans_mat[a][b] << " ";
+        //             }
+        //             cout << endl;
+        //     }
+        //     cout << endl;
+        // }
+
         
         glm::vec4 position = trans_mat * x;
         glm::vec4 normal = trans_mat * y; 
@@ -566,21 +636,31 @@ glm::mat4 ShapeSkin::DQS(std::shared_ptr<Skinner> skin, int vertex) {
 }
 
 glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
-    // calculates skinned position and normal
-    glm::mat4 lbs_mat(0.0f);
-    for (int j = 0; j < 2; ++j) {
+	// calculates skinned position and normal
+	glm::mat4 lbs_mat(0.0f);
+	for (int j = 0; j < 2; ++j) {
 
-        // i is vertex, j is bone, k is time
-        int bone = bonBuf.at(2*vertex+j);
+			// i is vertex, j is bone, k is time
+			int bone = bonBuf.at(2*vertex+j);
 
-        glm::mat4 dum1 = skin->getBind(bone);
-        // glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
-        dum1 = bone_translation.at(bone) * dum1; // inverse bind matrix * initial vertex
-        dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
+			glm::mat4 dum1 = skin->getBind(bone);
+			// glm::vec4 dum1 = skin->getBind(bone) * x; // inverse bind matrix * initial vertex
+			dum1 = bone_translation.at(bone) * dum1; // inverse bind matrix * initial vertex
+			dum1 = weiBuf.at(2*vertex+j) * dum1; // apply weight of ith vertex on jth bone
 
-        lbs_mat += dum1;
-    }
-    return lbs_mat;
+			lbs_mat += dum1;
+	}
+	// if (vertex == 8 || vertex == 9) {
+	// 	cout << "LBS at " << vertex << endl;
+	// 	for (int a = 0; a < 4; ++a) {
+	// 			for (int b = 0; b < 4; ++b) {
+	// 					cout << lbs_mat[a][b] << " ";
+	// 			}
+	// 			cout << endl;
+	// 	}
+	// 	cout << endl;
+	// }
+		return lbs_mat;
 }
 
 void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor) {
