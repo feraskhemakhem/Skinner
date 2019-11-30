@@ -245,8 +245,8 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
                 // cout << next_bone - bone_index << " ";
                 // cout << "nah\t";
 
-                wei1 = next_bone - bone_index;
-                wei2 = bone_index - prev_bone;
+                wei2 = next_bone - bone_index;
+                wei1 = bone_index - prev_bone;
 						}
             bon1 = next_bone;
             bon2 = prev_bone;
