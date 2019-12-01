@@ -11,7 +11,7 @@ Camera::Camera() :
 	fovy((float)(90/180.0*M_PI)),
 	znear(0.1f),
 	zfar(1000.0f),
-	rotations(0.0, 3.14/3),
+	rotations(3.14, 3.14/2),
 	translations(0.0f, 0.0f, -5.0f),
 	rfactor(0.01f),
 	tfactor(0.001f),
@@ -58,7 +58,9 @@ void Camera::mouseMoved(float x, float y)
 void Camera::applyProjectionMatrix(std::shared_ptr<MatrixStack> P) const
 {
 	// Modify provided MatrixStack
-	P->multMatrix(glm::perspective(fovy, aspect, znear, zfar));
+	// P->multMatrix(glm::perspective(fovy, aspect, znear, zfar));
+	// create orthographic view
+	P->multMatrix(glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, znear, zfar)); // 5 from gridsizehalf
 }
 
 void Camera::applyViewMatrix(std::shared_ptr<MatrixStack> MV) const

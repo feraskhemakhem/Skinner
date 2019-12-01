@@ -363,7 +363,7 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
         skin->addBind(E);
     }
     
-    for (int j = 0; j < 18; ++j) { // 18 animations, to get to 90 degrees
+    for (int j = 0; j <= 36; ++j) { // 36 animations, to get to 180 degrees
         // we read the the rest of the lines are not bind pose so yeah
         skin->pushAnime();
         PushDQ();
@@ -372,23 +372,15 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
 
             //https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
             q.x = 0;
-            // if (i == nbones-1) { // last bone
-            //     q.y = 0;
-            //     q.w = 1;
-            // }
-            // if (i == 0) { // first bone
-            //     q.y = sin(PI / 144 * j);
-            //     q.w = cos(PI / 144 * j);
-            // }    
             if (i%2 == 0) { // even bone
-                // q.y = sin(PI / 72 * j);
-                // q.w = cos(PI / 72 * j);
                 q.y = sin(PI / 144 * j);
                 q.w = cos(PI / 144 * j);
+                // q.y = sin(PI / 4);
+                // q.w = cos(PI / 4);
             }
             else { // odd bone
-                // q.y = -1*sin(PI / 72 * j);
-                // q.w = cos(PI / 72 * j);
+                // q.y = -1*sin(PI / 4);
+                // q.w = cos(PI / 4);
                 q.y = -1*sin(PI / 144 * j);
                 q.w = cos(PI / 144 * j);
             }
