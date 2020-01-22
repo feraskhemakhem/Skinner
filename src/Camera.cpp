@@ -5,7 +5,8 @@
 #include "Camera.h"
 #include "MatrixStack.h"
 
-Camera::Camera() :
+
+Camera::Camera(GLFWwindow* w) :
 	aspect(1.0f),
 	// fovy((float)(45.0*M_PI/180.0)),
 	fovy((float)(90/180.0*M_PI)),
@@ -15,7 +16,8 @@ Camera::Camera() :
 	translations(0.0f, 0.0f, -5.0f),
 	rfactor(0.01f),
 	tfactor(0.001f),
-	sfactor(0.005f)
+	sfactor(0.005f),
+	window(w)
 {
 }
 
@@ -58,7 +60,12 @@ void Camera::mouseMoved(float x, float y)
 void Camera::applyProjectionMatrix(std::shared_ptr<MatrixStack> P) const
 {
 	// Modify provided MatrixStack
-	P->multMatrix(glm::perspective(fovy, aspect, znear, zfar));
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	P->multMatrix(glm::ortho(-5.0f / 640.0f * width, 5.0f / 640.0f * width,
+	 -5.0f / 640.0f * height, 5.0f / 640.0f * height, znear, zfar));
+	// P->multMatrix(glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, znear, zfar));
+
 }
 
 void Camera::applyViewMatrix(std::shared_ptr<MatrixStack> MV) const

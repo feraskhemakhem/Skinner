@@ -7,6 +7,8 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+#include <GLFW/glfw3.h> // for GLFWwindow
+
 class MatrixStack;
 
 class Camera
@@ -18,7 +20,7 @@ public:
 		SCALE
 	};
 	
-	Camera();
+	Camera(GLFWwindow* w = NULL);
 	virtual ~Camera();
 	void setInitDistance(float z) { translations.z = -std::abs(z); }
 	void setAspect(float a) { aspect = a; };
@@ -31,6 +33,7 @@ public:
 	void applyViewMatrix(std::shared_ptr<MatrixStack> MV) const;
 	
 private:
+	GLFWwindow* window;
 	float aspect;
 	float fovy;
 	float znear;

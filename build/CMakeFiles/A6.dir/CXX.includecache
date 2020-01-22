@@ -23,6 +23,8 @@ memory
 -
 glm/glm.hpp
 -
+GLFW/glfw3.h
+-
 
 /Users/feraskhemakhem/Desktop/Research/Skinner/src/GLSL.cpp
 GLSL.h

@@ -4,6 +4,7 @@
 CMakeFiles/A6.dir/src/Camera.cpp.o: ../src/Camera.cpp
 CMakeFiles/A6.dir/src/Camera.cpp.o: ../src/Camera.h
 CMakeFiles/A6.dir/src/Camera.cpp.o: ../src/MatrixStack.h
+CMakeFiles/A6.dir/src/Camera.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glfw-3.2.1/include/GLFW/glfw3.h
 CMakeFiles/A6.dir/src/Camera.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/common.hpp
 CMakeFiles/A6.dir/src/Camera.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/detail/_fixes.hpp
 CMakeFiles/A6.dir/src/Camera.cpp.o: /Users/feraskhemakhem/Documents/GLSL_Libraries/glm/glm/detail/_swizzle.hpp

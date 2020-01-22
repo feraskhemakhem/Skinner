@@ -132,7 +132,7 @@ void loadScene()
 {
 	keyToggles[(unsigned)'c'] = true;
 	
-	camera = make_shared<Camera>();
+	camera = make_shared<Camera>(window);
 	
 	// Single shape for all the animations.
 	shape = make_shared<ShapeSkin>();
@@ -379,7 +379,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	// Create a windowed mode window and its OpenGL context.
-	window = glfwCreateWindow(640, 480, "LBS - QBS skinner", NULL, NULL);
+	window = glfwCreateWindow(640, 640, "LBS - QBS skinner", NULL, NULL);
 	if(!window) {
 		glfwTerminate();
 		return -1;
