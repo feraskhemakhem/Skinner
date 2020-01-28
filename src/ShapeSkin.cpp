@@ -124,7 +124,7 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
 
     // TRIANGLES START
 
-		// creating lower left triangles
+		// creating upper right triangles
 		for (int i = 0; i < posBuf.size()/3 - 1 - this->num_vertices_vert; ++i) { // additional -1 because of the we are using lower left corners
 				if ((i+1) % this->num_vertices_vert != 0) { // top row doesn't create triangles
 						elemBuf.push_back(i);
@@ -133,7 +133,7 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
 				}
 		}
 
-		// creating upper right triangles
+		// creating lower left triangles
 		for (int i = this->num_vertices_vert+1; i < posBuf.size()/3; ++i) {
 				if (i % this->num_vertices_vert != 0) { // top row doesn't create triangles
 						elemBuf.push_back(i);
@@ -693,7 +693,7 @@ glm::mat4 ShapeSkin::LBS(std::shared_ptr<Skinner> skin, int vertex) {
 		return lbs_mat;
 }
 
-void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_factor) {
+void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<float>* deform_factor) {
 
 	// cout << "deform is " << deform_factor << endl;
     // apply heirarchy of animations
@@ -716,7 +716,7 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const float deform_
         
         // calculates skinned position and normal with an interpolation of LBS and DQS
         // glm::mat4 interpol = LBS(skin, i);
-        glm::mat4 interpol = (1-deform_factor) * LBS(skin, i) + deform_factor * DQS(skin, i);
+        glm::mat4 interpol = (1-deform_factor->at(0)) * LBS(skin, i) + deform_factor->at(0) * DQS(skin, i);
         position = interpol * x;
         normal = interpol * y;
         
@@ -843,7 +843,7 @@ void ShapeSkin::draw(bool b)
  
 	// Draw
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elemBufID);
-		glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+    glDrawElements(GL_TRIANGLES, (int)elemBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 
     if (b) {
         glDisableVertexAttribArray(h_wei0);
@@ -866,3 +866,20 @@ void ShapeSkin::draw(bool b)
 
 }
 
+float ShapeSkin::calcArea() {
+    float totalArea = 0.0f;
+    for (int i = 0; i < elemBuf.size()/3-1; ++i) { // for each triangle
+        // calculate the area of that triangle (only works for 2D)
+        // 3*i, 3*i+1, 3*i+2 are vertices
+        glm::vec2 A = glm::vec2(skinnedPos.at(elemBuf.at(3*i)*3), skinnedPos.at(elemBuf.at(3*i)*3+2));
+        glm::vec2 B = glm::vec2(skinnedPos.at(elemBuf.at(3*i+1)*3), skinnedPos.at(elemBuf.at(3*i+1)*3+2));
+        glm::vec2 C = glm::vec2(skinnedPos.at(elemBuf.at(3*i+2)*3), skinnedPos.at(elemBuf.at(3*i+2)*3+2));
+
+
+        // stolen from https://www.mathopenref.com/coordtrianglearea.html
+        float x = fabs((A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y))/2.0f);
+        totalArea += x;
+
+    }
+    return totalArea;
+}

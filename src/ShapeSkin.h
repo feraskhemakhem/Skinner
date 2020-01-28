@@ -59,7 +59,8 @@ public:
 	void draw(bool b = false);
     void LBSskinOn(std::shared_ptr<Skinner> skin, int k);
     void DQSskinOn(std::shared_ptr<Skinner> skin, int k);
-    void skinOn(std::shared_ptr<Skinner> skin, int k, float deform_factor = 0);
+    void skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<float>* deform_factor);
+    float calcArea();
 
 
 	
@@ -93,8 +94,9 @@ private:
     std::vector<glm::vec3> translations;
     std::vector<std::vector<glm::quat>> dq_real;
     std::vector<std::vector<glm::quat>> dq_dual;
-    std::vector<glm::quat> bind_rotatiaon;
+    std::vector<glm::quat> bind_rotation;
     std::vector<glm::quat> bind_translation;
+
     
     // getters
     glm::quat r1, d1, r2, d2;

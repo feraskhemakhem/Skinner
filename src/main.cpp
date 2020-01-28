@@ -35,6 +35,7 @@ int RECT_WIDTH = 20;
 float DEFORM_FACTOR = 0.5; // coefficient for the weight between LBS and DQS
 bool keyToggles[256] = {false};
 double t;
+std::vector<float>* DEFORM_VECTOR; // list of deform factors for each vertex
 
 shared_ptr<Camera> camera = NULL;
 shared_ptr<ShapeSkin> shape = NULL;
@@ -55,12 +56,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 	else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) { // GLFW_KEY_RIGHT
-		DEFORM_FACTOR = std::min(DEFORM_FACTOR+0.1f, 1.0f);
-		cout << "deform factor: " << DEFORM_FACTOR << endl;
+		DEFORM_VECTOR->at(0) = std::min(DEFORM_VECTOR->at(0)+0.1f, 1.0f);
+		cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
 	}
 	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) { // GLFW_KEY_LEFT 
-		DEFORM_FACTOR = std::max(DEFORM_FACTOR-0.1f, 0.0f);
-		cout << "deform factor: " << DEFORM_FACTOR << endl;
+		DEFORM_VECTOR->at(0) = std::max(DEFORM_VECTOR->at(0)-0.1f, 0.0f);
+		cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
 	}
 }
 
@@ -69,9 +70,11 @@ static void char_callback(GLFWwindow *window, unsigned int key)
 	keyToggles[key] = !keyToggles[key];
 	if (key == 'a') {
 		t -= 0.3;
+		printf("%f is the area\n", shape->calcArea());
 	}
 	else if (key == 'd') {
 		t += 0.3;
+		printf("%f is the area\n", shape->calcArea());
 	}
 }
 
@@ -162,6 +165,8 @@ void init()
     
 	// my skinner things
 	walker = make_shared<Skinner>(NUM_BONES);
+	DEFORM_VECTOR = new std::vector<float>();
+	DEFORM_VECTOR->resize(NUM_VERTICES_HORIZ * NUM_VERTICES_VERT, DEFORM_FACTOR); // sets all deforms to the default
 
 	// Non-OpenGL things
 	// loadScene(MESH_FILE, ATTACHMENT_FILE, SKELETON_FILE);
@@ -225,7 +230,7 @@ void init()
 void render()
 {
 	// Update time.
-	// double t = glfwGetTime();
+	t = glfwGetTime();
 
 	// Get current frame buffer size.
 	int width, height;
@@ -338,7 +343,7 @@ void render()
 		// 	shape->skinOn(walker, timeScale, DEFORM_FACTOR);
 		// else
 		// 	shape->DQSskinOn(walker, timeScale);
-		shape->skinOn(walker, timeScale, DEFORM_FACTOR);
+		shape->skinOn(walker, timeScale, DEFORM_VECTOR);
 
 		shape->setProgram(progSkin);
 		shape->draw();
