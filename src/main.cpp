@@ -5,6 +5,8 @@
 #include <memory>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
+#include <string>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -44,6 +46,12 @@ shared_ptr<Program> progSkin = NULL;
 shared_ptr<Program> progBonus = NULL;
 shared_ptr<Skinner> walker = NULL;
 
+// file writing
+void write_data(int increment); // function to write data
+string temp_filename = "../data/temp.txt"; // filename for temp file
+ofstream tempFile; // tempfile
+int INCREMENT = -1; // increment of skips
+
 
 static void error_callback(int error, const char *description)
 {
@@ -57,11 +65,11 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	}
 	else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) { // GLFW_KEY_RIGHT
 		DEFORM_VECTOR->at(0) = std::min(DEFORM_VECTOR->at(0)+0.1f, 1.0f);
-		cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
+		// cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
 	}
 	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) { // GLFW_KEY_LEFT 
 		DEFORM_VECTOR->at(0) = std::max(DEFORM_VECTOR->at(0)-0.1f, 0.0f);
-		cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
+		// cout << "deform factor: " << DEFORM_VECTOR->at(0) << endl;
 	}
 }
 
@@ -227,10 +235,11 @@ void init()
 	GLSL::checkError(GET_FILE_LINE);
 }
 
-void render()
+void render(bool data = false)
 {
 	// Update time.
-	t = glfwGetTime();
+	if (!data)
+		t = glfwGetTime();
 
 	// Get current frame buffer size.
 	int width, height;
@@ -290,7 +299,7 @@ void render()
 	}
 	glEnd();
 	int timeScale;
-	timeScale = (int)(t*4); // determines the relative speed of cheb
+	timeScale = (int)(t); // determines the relative speed of cheb
 	if(keyToggles[(unsigned)'b']) {
 		// dra	ng bones
 		float boneScale = 0.25f; // determines the size of the bones
@@ -361,6 +370,14 @@ void render()
 int main(int argc, char **argv)
 {
 
+	if (argc > 1 && string(argv[1]) == "commands") {
+		printf("./A6 NUM_BONES NUM_VERTICES_HORIZ NUM_VERTICES_VERT RECT_WIDTH RECT_LENGTH DEFORM_FACTOR\n");
+		return 0;
+	}
+	else {
+		cout << argv[1] << endl;
+	}
+
 	// RESOURCE_DIR = argv[1] + string("/");
 	RESOURCE_DIR = "../resources/";
 	NUM_BONES = argc > 1 ? atoi(argv[1]) : 2;
@@ -369,6 +386,7 @@ int main(int argc, char **argv)
 	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
 	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
 	DEFORM_FACTOR = argc > 6 ? atoi(argv[6]) : 0.5;
+	INCREMENT = argc > 7 ? atoi(argv[7]) : -1;
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone
@@ -412,17 +430,42 @@ int main(int argc, char **argv)
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	// Initialize scene.
 	init();
-	// Loop until the user closes the window.
-	while(!glfwWindowShouldClose(window)) {
-		// Render scene.
-		render();
-		// Swap front and back buffers.
-		glfwSwapBuffers(window);
-		// Poll for and process events.
-		glfwPollEvents();
+
+	if (INCREMENT > 0) { // if we are just writing data
+		tempFile.open(temp_filename); // open temp file
+
+		if (tempFile.is_open()) { // write in temp file if open
+
+			write_data(INCREMENT);
+		}
+		tempFile.close();
+	}
+	else { // if we are running the whole program and not writing data
+		// Loop until the user closes the window.
+		while(!glfwWindowShouldClose(window)) {
+			// Render scene.
+			render();
+			// Swap front and back buffers.
+			glfwSwapBuffers(window);
+			// Poll for and process events.
+			glfwPollEvents();
+		}
 	}
 	// Quit program.
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+}
+
+
+// this function writes data to a set of temporary files for python to read from
+void write_data(int increments) {
+	cout << endl;
+	for (int i = 0; i < ceil(90.0/increments); ++i) {
+		t = i; // set time step
+		render(true);
+		tempFile << int(i*increments) << " " << shape->calcArea() << endl;
+		cout << "\rprocessing iteration " << i+1 << "/" << ceil(90.0/increments) << flush;
+	}
+	cout << endl << "Data collected!" << endl;
 }

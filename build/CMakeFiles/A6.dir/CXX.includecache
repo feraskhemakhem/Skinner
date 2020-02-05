@@ -129,6 +129,10 @@ cstdlib
 -
 algorithm
 -
+fstream
+-
+string
+-
 GL/glew.h
 -
 GLFW/glfw3.h

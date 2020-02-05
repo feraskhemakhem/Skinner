@@ -74,7 +74,7 @@ void ShapeSkin::loadMesh(const string &meshName)
 
 void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_vert, const int length, const int width) {
 
-	cout << "vertices are " << num_vertices_horiz << " x " << num_vertices_vert << endl;
+	// cout << "vertices are " << num_vertices_horiz << " x " << num_vertices_vert << endl;
     // determine how much to seperate each vertex, and the set points
     float dist_seperation_horiz = (float)width / (num_vertices_horiz - 1); // -1 because the distance is betweens points, which there are 1 less distance than point
     float dist_seperation_vert = (float)length / (num_vertices_vert - 1);
@@ -87,13 +87,13 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
     // std::cout << "Loading mesh with " << current_x << " " << -1 * length / 2.0 << std::endl;
 
     // calculate the locations in the z direction where vertices go once
-    cout << "z locations at ";
+    // cout << "z locations at ";
     while ((current_z - (float)length / 2) <= 0.001) {
         vertical_vertex_locations.push_back(current_z);
-        cout << current_z << " ";
+        // cout << current_z << " ";
         current_z += dist_seperation_vert;
     }
-    cout << endl;
+    // cout << endl;
 
     // first vertex is at -width/2, all the way to width/2
     // cout << dist_seperation_horiz << " is distance between each vertex" << endl;
@@ -112,11 +112,11 @@ void ShapeSkin::loadMesh(const int num_vertices_horiz, const int num_vertices_ve
             norBuf.push_back(1); // y value always 1 for 2D normals
             norBuf.push_back(vertical_vertex_locations.at(i)); // precalculated z value
         }
-        cout << current_x << " ";
+        // cout << current_x << " ";
 
         current_x += dist_seperation_horiz;
     }
-    cout << endl;
+    // cout << endl;
 
     skinnedPos = posBuf;
     skinnedNor = norBuf;
@@ -188,7 +188,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
     float seperation_ratio = float(num_bones + 1) / float(num_vertices_horiz - 1);
     float bone_index, prev_bone, next_bone;
-    cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
+    // cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
     float wei1, wei2, bon1, bon2;
 
@@ -198,7 +198,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
     for (int i = 0; i < num_bones; ++i) {
         x_location += dist_seperation;
         bonLoc.push_back(x_location);
-        cout << "x_location " << x_location << endl;
+        // cout << "x_location " << x_location << endl;
     }
     bonLoc.push_back(dist_seperation); //FIXME: TESTING WITH ILLEGAL VALUE DONT MIND ME
     for (int i = 0; i < this->num_vertices_horiz; ++i) {
@@ -252,7 +252,7 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
             bon2 = prev_bone;
         }
         // cout << prev_bone << " " << next_bone << endl;
-        cout << i << " " << posBuf.at(3*i*this->num_vertices_vert) << " " << wei1 << " for bone " << bon1 << " and " << wei2 << " for bone " << bon2 << endl;
+        // cout << i << " " << posBuf.at(3*i*this->num_vertices_vert) << " " << wei1 << " for bone " << bon1 << " and " << wei2 << " for bone " << bon2 << endl;
   
         for (int j = 0; j < this->num_vertices_vert; ++j) {
             weiBuf.push_back(wei1);

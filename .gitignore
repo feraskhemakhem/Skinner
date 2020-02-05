@@ -32,5 +32,6 @@ _deps
 
 # Ignore folder created
 reference/*
+data/*
 
 # End of https://www.gitignore.io/api/cmake,visualstudiocode
