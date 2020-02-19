@@ -1,5 +1,6 @@
 import numpy
 import matplotlib.pyplot as plt
+import sys
 
 angles = []
 areas = []
@@ -41,5 +42,6 @@ plt.ylabel('Area')
 plt.title('Linear Interpolation') 
   
 # functions to save and show the plot 
-plt.savefig('../data/linear_interpolation.png')
+savefile = '../data/' + str(sys.argv[1])
+plt.savefig(savefile)
 plt.show() 

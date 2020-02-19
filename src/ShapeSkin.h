@@ -11,6 +11,13 @@
 class MatrixStack;
 class Program;
 
+struct bonesNweights {
+    int bone1;
+    int bone2;
+    float weight1;
+    float weight2;
+};
+
 class Skinner
 {
     // xi(0) will be handled in the shaders
@@ -116,6 +123,14 @@ private:
     // general helper functions
     glm::mat4 DQS(std::shared_ptr<Skinner> skin, int vertex);
     glm::mat4 LBS(std::shared_ptr<Skinner> skin, int vertex);
+
+    std::vector<float> bone_weights;
+    void loadWeightsRand(int max_weight = 1);
+    bonesNweights getFirstBoneWeight (float bone_index);
+    std::vector<float> deform_vector;
+    int start_v, end_v;
+public:
+    void setInfluenceWidth(float i);
 };
 
 #endif

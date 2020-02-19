@@ -28,6 +28,7 @@ ShapeSkin::ShapeSkin() :
     influID(0),
     bonBufID(0)
 {
+    deform_vector.resize(3,0);
 }
 
 ShapeSkin::~ShapeSkin()
@@ -185,6 +186,9 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
 {
     assert (num_bones != 0);
     this->num_bones = num_bones;
+
+    loadWeightsRand(); // calls the function to make bone weights
+
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
     float seperation_ratio = float(num_bones + 1) / float(num_vertices_horiz - 1);
     float bone_index, prev_bone, next_bone;
@@ -207,123 +211,59 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // vertex location * ratio will give us the index of bone we are at
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
-        // bone_index = 1;
-        // cout << "    " << bone_index << endl;
 
-        // edge cases - if an invisible bone is weighted, make it unimportant
-        if (bone_index < 0) { // if using the first bone
-        // cout << "first bone" << endl;
-
-            wei1 = 1;
-            wei2 = 0;
-            bon1 = 0;
-            bon2 = 0;
-
-        }
-        else if (bone_index > num_bones-1) { // if using the last 2 bones
-        // cout << "last bone" <<endl;
-
-            wei1 = 1;
-            wei2 = 0;
-            bon1 = num_bones-1;
-            bon2 = num_bones-2;
-        }
-        else 
-        {
-            // cout << bone_index << " is bone index\t";
-            prev_bone = floor(bone_index);
-            next_bone = ceil(bone_index);
-
-            // if the two bones are the same, give a weight of 1
-            if ((next_bone - prev_bone) < 0.001) {
-                // cout << "ok\t" << endl;
-
-                wei1 = 1;
-                wei2 = 0;
-            }
-            else {
-                // cout << next_bone - bone_index << " ";
-                // cout << "nah\t";
-
-                wei2 = next_bone - bone_index;
-                wei1 = bone_index - prev_bone;
-            }
-            bon1 = next_bone;
-            bon2 = prev_bone;
-        }
-        // cout << prev_bone << " " << next_bone << endl;
-        // cout << i << " " << posBuf.at(3*i*this->num_vertices_vert) << " " << wei1 << " for bone " << bon1 << " and " << wei2 << " for bone " << bon2 << endl;
-  
+        bonesNweights b = getFirstBoneWeight(bone_index);
         for (int j = 0; j < this->num_vertices_vert; ++j) {
-            weiBuf.push_back(wei1);
-            weiBuf.push_back(wei2);
-            bonBuf.push_back(bon1);
-            bonBuf.push_back(bon2);
+            weiBuf.push_back(b.weight1);
+            weiBuf.push_back(b.weight2);
+            bonBuf.push_back(b.bone1);
+            bonBuf.push_back(b.bone2);
         }
+
+        // // edge cases - if an invisible bone is weighted, make it unimportant
+        // if (bone_index < 0) { // if using the first bone
+
+        //     wei1 = 1;
+        //     wei2 = 0;
+        //     bon1 = 0;
+        //     bon2 = 0;
+
+        // }
+        // else if (bone_index > num_bones-1) { // if using the last 2 bones
+
+        //     wei1 = 1;
+        //     wei2 = 0;
+        //     bon1 = num_bones-1;
+        //     bon2 = num_bones-2;
+        // }
+        // else 
+        // {
+        //     prev_bone = floor(bone_index);
+        //     next_bone = ceil(bone_index);
+
+        //     // if the two bones are the same, give a weight of 1
+        //     if ((next_bone - prev_bone) < 0.001) {
+
+        //         wei1 = 1;
+        //         wei2 = 0;
+        //     }
+        //     else {
+
+        //         wei2 = next_bone - bone_index;
+        //         wei1 = bone_index - prev_bone;
+        //     }
+        //     bon1 = next_bone;
+        //     bon2 = prev_bone;
+        // }
+  
+        // for (int j = 0; j < this->num_vertices_vert; ++j) {
+        //     weiBuf.push_back(wei1);
+        //     weiBuf.push_back(wei2);
+        //     bonBuf.push_back(bon1);
+        //     bonBuf.push_back(bon2);
+        // }
 
     }
-		// 	for (int i = 0; i < this->num_vertices_horiz/2; ++i) {
-    //     // lower, then upper vertex
-        
-    //     // vertex location * ratio will give us the index of bone we are at
-    //     // +1 to make up for index, and -2 because the first bone is at index 1
-    //     bone_index = (i * seperation_ratio) - 1;
-    //     bone_index = -1;
-    //     cout << "bone index " << bone_index << endl;
-
-    //     // edge cases - if an invisible bone is weighted, make it unimportant
-    //     if (bone_index < 0) { // if using the first bone
-    //     // cout << "first bone" << endl;
-    //         weiBuf.push_back(1); // ratio wrt distance
-    //         weiBuf.push_back(0); // "
-    //         bonBuf.push_back(0);
-    //         bonBuf.push_back(1);
-    //         weiBuf.push_back(1); // ratio wrt distance
-    //         weiBuf.push_back(0); // "
-    //         bonBuf.push_back(0);
-    //         bonBuf.push_back(1);
-    //     }
-    //     else if (bone_index > num_bones-1) { // if using the last 2 bones
-    //     // cout << "last bone" <<endl;
-    //         weiBuf.push_back(1); // ratio wrt distance
-    //         weiBuf.push_back(0); // "
-    //         bonBuf.push_back(num_bones-1);
-    //         bonBuf.push_back(num_bones-2);
-    //         weiBuf.push_back(1); // ratio wrt distance
-    //         weiBuf.push_back(0); // "
-    //         bonBuf.push_back(num_bones-1);
-    //         bonBuf.push_back(num_bones-2);
-    //     }
-    //     else 
-    //     {
-    //         // cout << bone_index << " is bone index\t";
-    //         prev_bone = floor(bone_index);
-    //         next_bone = ceil(bone_index);
-
-    //         // if the two bones are the same, give a weight of 1
-    //         if ((next_bone - prev_bone) < 0.001) {
-    //             weiBuf.push_back(1);
-    //             weiBuf.push_back(0);
-    //             weiBuf.push_back(1);
-    //             weiBuf.push_back(0);
-    //             // cout << "ok\t" << endl;
-    //         }
-    //         else {
-    //             weiBuf.push_back(next_bone - bone_index);
-    //             weiBuf.push_back(bone_index - prev_bone);
-    //             weiBuf.push_back(next_bone - bone_index);
-    //             weiBuf.push_back(bone_index - prev_bone);
-    //             cout << next_bone - bone_index << " ";
-    //             // cout << "nah\t";
-    //         }
-    //         bonBuf.push_back(next_bone);
-    //         bonBuf.push_back(prev_bone);
-    //         bonBuf.push_back(next_bone);
-    //         bonBuf.push_back(prev_bone);
-    //     }
-    //     cout << prev_bone << " " << next_bone << endl;
-
-    // }
 }
 
 // this is the animation that the vertices do, in x y z format
@@ -704,6 +644,8 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
         bone_translation.push_back(bone_translation.at(i-1) * skin->getAnime(k,i));
     }
 
+    float deform;
+
         // iterates all the vertices
     for (int i = 0; i < posBuf.size()/3; ++i) {
 
@@ -713,10 +655,17 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
         glm::vec4 x(posBuf.at(i*3),posBuf.at(3*i+1),posBuf.at(3*i+2), 1.0f);
         glm::vec4 y(norBuf.at(i*3),norBuf.at(3*i+1),norBuf.at(3*i+2), 0.0f);
 
-        
         // calculates skinned position and normal with an interpolation of LBS and DQS
         // glm::mat4 interpol = LBS(skin, i);
-        glm::mat4 interpol = (1-deform_factor->at(0)) * LBS(skin, i) + deform_factor->at(0) * DQS(skin, i);
+
+        if (i > start_v && i < end_v) {
+            
+        }
+        else { // defaul deform value
+            deform = deform_factor->at(0);
+        }
+
+        glm::mat4 interpol = (1-deform) * LBS(skin, i) + deform * DQS(skin, i);
         position = interpol * x;
         normal = interpol * y;
         
@@ -866,6 +815,8 @@ void ShapeSkin::draw(bool b)
 
 }
 
+// other helpers
+
 float ShapeSkin::calcArea() {
     float totalArea = 0.0f;
     for (int i = 0; i < elemBuf.size()/3-1; ++i) { // for each triangle
@@ -882,4 +833,74 @@ float ShapeSkin::calcArea() {
 
     }
     return totalArea;
+}
+
+// load random weights - not really needed anymore i guess
+void ShapeSkin::loadWeightsRand(int max_weight) {
+    for (int i = 0; i < num_bones; ++i) {
+        bone_weights.push_back((float(rand())/float(RAND_MAX)) * max_weight);
+    }
+}
+
+// determine the weight of each bone
+bonesNweights ShapeSkin::getFirstBoneWeight (float bone_index) {
+    bonesNweights bNw;
+    int bon1, bon2;
+    float wei1, wei2, prev_bone, next_bone;
+    // edge cases - if an invisible bone is weighted, make it unimportant
+    if (bone_index < 0) { // if using the first bone
+    // cout << "first bone" << endl;
+
+        wei1 = 1;
+        wei2 = 0;
+        bon1 = 0;
+        bon2 = 0;
+
+    }
+    else if (bone_index > num_bones-1) { // if using the last 2 bones
+    // cout << "last bone" <<endl;
+
+        wei1 = 1;
+        wei2 = 0;
+        bon1 = num_bones-1;
+        bon2 = num_bones-2;
+    }
+    else 
+    {
+        // cout << bone_index << " is bone index\t";
+        prev_bone = floor(bone_index);
+        next_bone = ceil(bone_index);
+
+        // if the two bones are the same, give a weight of 1
+        if ((next_bone - prev_bone) < 0.001) {
+            // cout << "ok\t" << endl;
+
+            wei1 = 1;
+            wei2 = 0;
+        }
+        else {
+            // cout << next_bone - bone_index << " ";
+            // cout << "nah\t";
+
+            wei2 = next_bone - bone_index;
+            wei1 = bone_index - prev_bone;
+        }
+        bon1 = next_bone;
+        bon2 = prev_bone;
+    }
+
+    bNw.bone1 = bon1;
+    bNw.bone2 = bon2;
+    bNw.weight1 = wei1;
+    bNw.weight2 = wei2;
+    return bNw;
+}
+
+void ShapeSkin::setInfluenceWidth(float i) { // ASSUME 3 BONES
+    int start_h = (int)ceil((float)num_vertices_horiz / ((float)num_bones+1)); // get vertices per sector
+    start_h *= (int)floor((float)start_v * 1.5f);
+    this->start_v = start_h * num_vertices_vert; // the count has to include both dimensions
+
+    int end_h = num_vertices_horiz - start_h;
+    this->end_v = end_h * num_vertices_vert;
 }

@@ -150,6 +150,7 @@ void loadScene()
 	shape->loadMesh(NUM_VERTICES_HORIZ, NUM_VERTICES_VERT, RECT_LENGTH, RECT_WIDTH);
 
 	shape->loadAttachment(NUM_BONES, RECT_WIDTH);
+	shape->setInfluenceWidth(0.5);
 	// This function now loads the attachments and saves bind pose to bindPose, along with the other animations to boneAnimations
 	shape->loadSkeleton(walker);
 
@@ -386,6 +387,7 @@ int main(int argc, char **argv)
 	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
 	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
 	DEFORM_FACTOR = argc > 6 ? atoi(argv[6]) : 0.5;
+	// INFLUENCE_WIDTH = argc > 7 ? atoi(argv[7])
 	INCREMENT = argc > 7 ? atoi(argv[7]) : -1;
 
 	// error checking: asserts to make sure valid input
