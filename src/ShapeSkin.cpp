@@ -186,15 +186,15 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
 {
     assert (num_bones != 0);
     this->num_bones = num_bones;
-
+    this->width = width;
     loadWeightsRand(); // calls the function to make bone weights
 
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
     float seperation_ratio = float(num_bones + 1) / float(num_vertices_horiz - 1);
-    float bone_index, prev_bone, next_bone;
+    float bone_index;//, prev_bone, next_bone;
     // cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
-    float wei1, wei2, bon1, bon2;
+    // float wei1, wei2, bon1, bon2;
 
     numInfl = std::vector<float>(this->num_vertices_horiz * this->num_vertices_vert, 2);
 
@@ -659,7 +659,11 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
         // glm::mat4 interpol = LBS(skin, i);
 
         if (i > start_v && i < end_v) {
-            
+            if ((i - start_v) >= vertex_deform.size())
+                // std::cout << i << std::endl;
+            // deform = vertex_deform.at(i - start_v);
+            deform = deform_factor->at(0);
+
         }
         else { // defaul deform value
             deform = deform_factor->at(0);
@@ -896,11 +900,52 @@ bonesNweights ShapeSkin::getFirstBoneWeight (float bone_index) {
     return bNw;
 }
 
-void ShapeSkin::setInfluenceWidth(float i) { // ASSUME 3 BONES
+void ShapeSkin::setInfluenceWidth(float j) { // ASSUME 3 BONES
+    // HARD CODED WEIGHTS OF INFLUENCE AREA
+    weights_for_influencing.clear();
+    weights_for_influencing.push_back(0);
+    weights_for_influencing.push_back(1);
+    weights_for_influencing.push_back(0);
+
+    // find the first and last vertex affected by mixing
     int start_h = (int)ceil((float)num_vertices_horiz / ((float)num_bones+1)); // get vertices per sector
-    start_h *= (int)floor((float)start_v * 1.5f);
+    start_h *= (int)floor((float)start_v * (2 - j));
     this->start_v = start_h * num_vertices_vert; // the count has to include both dimensions
 
     int end_h = num_vertices_horiz - start_h;
-    this->end_v = end_h * num_vertices_vert;
+    this->end_v = (end_h+1) * num_vertices_vert - 1;
+
+    // now that we know the vertices, we set weights of each vertex
+    vertex_deform.clear(); // in case it isn't cleared for some reason
+
+
+    float start_x, mid_x, end_x, prev_dist, post_dist, ratio_first;
+    start_x = -0.5f * float(width) + (2-j) * dist_seperation; // i behind from 2nd bone
+    mid_x = -0.5f * float(width) + 2 * dist_seperation; // location of 2nd bone
+    end_x = -0.5f * float(width) + (2+j) * dist_seperation; // i in front of 2nd bone
+
+    std::cout << "x's are " << start_x << ", " << mid_x << ", and " << end_x << std::endl;
+    // go through each vertex and calcuate vertex weight
+    for (int i = start_v; i <= end_v; ++i) {
+        // 0 for start, 1 for middle, 2 for right
+        if (posBuf.at(i*3) < mid_x) { // if left
+            prev_dist = posBuf.at(i*3) - start_x;
+            post_dist = mid_x - posBuf.at(i*3);
+            ratio_first = prev_dist / prev_dist+post_dist;
+            // vertex_deform.push_back(weights_for_influencing.at(0)*ratio_first + weights_for_influencing.at(1)*(1-ratio_first));
+        }
+        else if (posBuf.at(i*3) > mid_x) { // if right
+            prev_dist = posBuf.at(i*3) - start_x;
+            post_dist = mid_x - posBuf.at(i*3);
+            ratio_first = prev_dist / prev_dist+post_dist;
+            vertex_deform.push_back(weights_for_influencing.at(1)*ratio_first + weights_for_influencing.at(2)*(1-ratio_first));
+        }
+        else { // if middle
+            vertex_deform.push_back(weights_for_influencing.at(1));
+        }
+
+        
+    }
+
+    std::cout << "size is " << vertex_deform.size() << std::endl;
 }

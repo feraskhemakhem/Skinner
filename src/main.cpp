@@ -370,13 +370,9 @@ void render(bool data = false)
 
 int main(int argc, char **argv)
 {
-
-	if (argc > 1 && string(argv[1]) == "commands") {
+	if (argc == 1) {
 		printf("./A6 NUM_BONES NUM_VERTICES_HORIZ NUM_VERTICES_VERT RECT_WIDTH RECT_LENGTH DEFORM_FACTOR\n");
 		return 0;
-	}
-	else {
-		cout << argv[1] << endl;
 	}
 
 	// RESOURCE_DIR = argv[1] + string("/");

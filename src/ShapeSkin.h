@@ -69,13 +69,13 @@ public:
     void skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<float>* deform_factor);
     float calcArea();
 
-
 	
 private:
     int num_bones;
     int num_vertices_horiz;
     int num_vertices_vert;
     float dist_seperation;
+    int width;
 	std::shared_ptr<Program> prog;
 	std::vector<unsigned int> elemBuf; // index of vertex in triangular face (2 faces, 6)
 	std::vector<float> posBuf; // x, y, z of each vert position
@@ -129,8 +129,10 @@ private:
     bonesNweights getFirstBoneWeight (float bone_index);
     std::vector<float> deform_vector;
     int start_v, end_v;
+    std::vector<float> vertex_deform;
+    std::vector<float> weights_for_influencing;
 public:
-    void setInfluenceWidth(float i);
+    void setInfluenceWidth(float j);
 };
 
 #endif
