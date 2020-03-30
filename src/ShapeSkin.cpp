@@ -191,10 +191,10 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
 
     this->dist_seperation = float(width) / (num_bones + 1); // +1 becuse there are "invisible" bones at the ends of the mesh
     float seperation_ratio = float(num_bones + 1) / float(num_vertices_horiz - 1);
-    float bone_index;//, prev_bone, next_bone;
+    float bone_index, prev_bone, next_bone;
     // cout << "seperation ratio " << seperation_ratio << " dist seperation " << dist_seperation << endl; 
 
-    // float wei1, wei2, bon1, bon2;
+    float wei1, wei2, bon1, bon2;
 
     numInfl = std::vector<float>(this->num_vertices_horiz * this->num_vertices_vert, 2);
 
@@ -212,56 +212,56 @@ void ShapeSkin::loadAttachment(const int num_bones, const int width)
         // +1 to make up for index, and -2 because the first bone is at index 1
         bone_index = (i * seperation_ratio) - 1;
 
-        bonesNweights b = getFirstBoneWeight(bone_index);
-        for (int j = 0; j < this->num_vertices_vert; ++j) {
-            weiBuf.push_back(b.weight1);
-            weiBuf.push_back(b.weight2);
-            bonBuf.push_back(b.bone1);
-            bonBuf.push_back(b.bone2);
-        }
-
-        // // edge cases - if an invisible bone is weighted, make it unimportant
-        // if (bone_index < 0) { // if using the first bone
-
-        //     wei1 = 1;
-        //     wei2 = 0;
-        //     bon1 = 0;
-        //     bon2 = 0;
-
-        // }
-        // else if (bone_index > num_bones-1) { // if using the last 2 bones
-
-        //     wei1 = 1;
-        //     wei2 = 0;
-        //     bon1 = num_bones-1;
-        //     bon2 = num_bones-2;
-        // }
-        // else 
-        // {
-        //     prev_bone = floor(bone_index);
-        //     next_bone = ceil(bone_index);
-
-        //     // if the two bones are the same, give a weight of 1
-        //     if ((next_bone - prev_bone) < 0.001) {
-
-        //         wei1 = 1;
-        //         wei2 = 0;
-        //     }
-        //     else {
-
-        //         wei2 = next_bone - bone_index;
-        //         wei1 = bone_index - prev_bone;
-        //     }
-        //     bon1 = next_bone;
-        //     bon2 = prev_bone;
-        // }
-  
+        // bonesNweights b = getFirstBoneWeight(bone_index);
         // for (int j = 0; j < this->num_vertices_vert; ++j) {
-        //     weiBuf.push_back(wei1);
-        //     weiBuf.push_back(wei2);
-        //     bonBuf.push_back(bon1);
-        //     bonBuf.push_back(bon2);
+        //     weiBuf.push_back(b.weight1);
+        //     weiBuf.push_back(b.weight2);
+        //     bonBuf.push_back(b.bone1);
+        //     bonBuf.push_back(b.bone2);
         // }
+
+        // edge cases - if an invisible bone is weighted, make it unimportant
+        if (bone_index < 0) { // if using the first bone
+
+            wei1 = 1;
+            wei2 = 0;
+            bon1 = 0;
+            bon2 = 0;
+
+        }
+        else if (bone_index > num_bones-1) { // if using the last 2 bones
+
+            wei1 = 1;
+            wei2 = 0;
+            bon1 = num_bones-1;
+            bon2 = num_bones-2;
+        }
+        else 
+        {
+            prev_bone = floor(bone_index);
+            next_bone = ceil(bone_index);
+
+            // if the two bones are the same, give a weight of 1
+            if ((next_bone - prev_bone) < 0.001) {
+
+                wei1 = 1;
+                wei2 = 0;
+            }
+            else {
+
+                wei2 = next_bone - bone_index;
+                wei1 = bone_index - prev_bone;
+            }
+            bon1 = next_bone;
+            bon2 = prev_bone;
+        }
+  
+        for (int j = 0; j < this->num_vertices_vert; ++j) {
+            weiBuf.push_back(wei1);
+            weiBuf.push_back(wei2);
+            bonBuf.push_back(bon1);
+            bonBuf.push_back(bon2);
+        }
 
     }
 }
@@ -316,17 +316,24 @@ void ShapeSkin::loadSkeleton(std::shared_ptr<Skinner> skin)
             //     q.y = 0;
             //     q.w = 1;
             // }
-            if (i == 0) {
+            if (i == 0) { // rightmost
                 q.y = -1*sin(PI / 144 * j);
                 q.w = cos(PI / 144 * j);
             }    
             else if (i%2 == 0) {
-                q.y = -1*sin(PI / 72 * j);
-                q.w = cos(PI / 72 * j);
+                // q.y = -1*sin(PI / 72 * j);
+                // q.w = cos(PI / 72 * j);
+                q.y = 0;
+                q.w = 1;
             }
             else {
-                q.y = sin(PI / 72 * j);
+                q.y = sin(PI / 72 * j); // 5 degrees
                 q.w = cos(PI / 72 * j);
+                // q.y = sin(PI / 144 * j); // 2.5 degrees
+                // q.w = cos(PI / 144 * j);
+                // q.y = 0;
+                // q.w = 1;
+                // 48 is 7.5 degrees
             }
         
             q.z = 0;
@@ -658,11 +665,11 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
         // calculates skinned position and normal with an interpolation of LBS and DQS
         // glm::mat4 interpol = LBS(skin, i);
 
-        if (i > start_v && i < end_v) {
-            if ((i - start_v) >= vertex_deform.size())
-                // std::cout << i << std::endl;
-            // deform = vertex_deform.at(i - start_v);
-            deform = deform_factor->at(0);
+        if (i >= start_v && i <= end_v) {
+            // if ((i - start_v) >= vertex_deform.size())
+            //     std::cout << "uh oh " << i << std::endl;
+            deform = vertex_deform.at(i - start_v);
+            // deform = deform_factor->at(0);
 
         }
         else { // defaul deform value
@@ -900,31 +907,33 @@ bonesNweights ShapeSkin::getFirstBoneWeight (float bone_index) {
     return bNw;
 }
 
-void ShapeSkin::setInfluenceWidth(float j) { // ASSUME 3 BONES
+void ShapeSkin::setInfluenceWidth(float j, float v0, float v1) { // ASSUME 3 BONES
     // HARD CODED WEIGHTS OF INFLUENCE AREA
     weights_for_influencing.clear();
-    weights_for_influencing.push_back(0);
-    weights_for_influencing.push_back(1);
-    weights_for_influencing.push_back(0);
+    weights_for_influencing.push_back(v0);
+    weights_for_influencing.push_back(v1); // v0 is the same on both ends, v1 is in the middle
 
     // find the first and last vertex affected by mixing
-    int start_h = (int)ceil((float)num_vertices_horiz / ((float)num_bones+1)); // get vertices per sector
-    start_h *= (int)floor((float)start_v * (2 - j));
+    int start_h = int(ceil(float(num_vertices_horiz) / float(num_bones+1))); // get vertices per sector
+    start_h = int(floor(float(start_h) * (2.0f - j)));
     this->start_v = start_h * num_vertices_vert; // the count has to include both dimensions
 
-    int end_h = num_vertices_horiz - start_h;
+    int end_h = num_vertices_horiz - start_h - 1;
     this->end_v = (end_h+1) * num_vertices_vert - 1;
 
     // now that we know the vertices, we set weights of each vertex
     vertex_deform.clear(); // in case it isn't cleared for some reason
 
-
+    // find locations in initial mesh where each sector is
     float start_x, mid_x, end_x, prev_dist, post_dist, ratio_first;
     start_x = -0.5f * float(width) + (2-j) * dist_seperation; // i behind from 2nd bone
     mid_x = -0.5f * float(width) + 2 * dist_seperation; // location of 2nd bone
     end_x = -0.5f * float(width) + (2+j) * dist_seperation; // i in front of 2nd bone
 
     std::cout << "x's are " << start_x << ", " << mid_x << ", and " << end_x << std::endl;
+    std::cout << "start_v " << start_v << " and end_v " << end_v << std::endl;
+    // std::cout << "start_h " << start_h << " and end_h " << end_h << std::endl;
+
     // go through each vertex and calcuate vertex weight
     for (int i = start_v; i <= end_v; ++i) {
         // 0 for start, 1 for middle, 2 for right
@@ -932,13 +941,13 @@ void ShapeSkin::setInfluenceWidth(float j) { // ASSUME 3 BONES
             prev_dist = posBuf.at(i*3) - start_x;
             post_dist = mid_x - posBuf.at(i*3);
             ratio_first = prev_dist / prev_dist+post_dist;
-            // vertex_deform.push_back(weights_for_influencing.at(0)*ratio_first + weights_for_influencing.at(1)*(1-ratio_first));
+            vertex_deform.push_back(weights_for_influencing.at(0)*ratio_first + weights_for_influencing.at(1)*(1-ratio_first));
         }
         else if (posBuf.at(i*3) > mid_x) { // if right
             prev_dist = posBuf.at(i*3) - start_x;
             post_dist = mid_x - posBuf.at(i*3);
             ratio_first = prev_dist / prev_dist+post_dist;
-            vertex_deform.push_back(weights_for_influencing.at(1)*ratio_first + weights_for_influencing.at(2)*(1-ratio_first));
+            vertex_deform.push_back(weights_for_influencing.at(1)*ratio_first + weights_for_influencing.at(0)*(1-ratio_first));
         }
         else { // if middle
             vertex_deform.push_back(weights_for_influencing.at(1));
@@ -947,5 +956,5 @@ void ShapeSkin::setInfluenceWidth(float j) { // ASSUME 3 BONES
         
     }
 
-    std::cout << "size is " << vertex_deform.size() << std::endl;
+    // std::cout << "size is " << vertex_deform.size() << std::endl;
 }

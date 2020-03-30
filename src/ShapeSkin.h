@@ -132,7 +132,7 @@ private:
     std::vector<float> vertex_deform;
     std::vector<float> weights_for_influencing;
 public:
-    void setInfluenceWidth(float j);
+    void setInfluenceWidth(float j, float v0, float v1);
 };
 
 #endif
