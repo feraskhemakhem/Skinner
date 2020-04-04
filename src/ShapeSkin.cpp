@@ -671,10 +671,17 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
             deform = vertex_deform.at(i - start_v);
             // deform = deform_factor->at(0);
 
+
         }
         else { // defaul deform value
             deform = deform_factor->at(0);
+            // std::cout << "DEFORM: " << deform << std::endl;
+
         }
+
+        // deform = deform_factor->at(0);
+
+
 
         glm::mat4 interpol = (1-deform) * LBS(skin, i) + deform * DQS(skin, i);
         position = interpol * x;
@@ -907,8 +914,10 @@ bonesNweights ShapeSkin::getFirstBoneWeight (float bone_index) {
     return bNw;
 }
 
-void ShapeSkin::setInfluenceWidth(float j, float v0, float v1) { // ASSUME 3 BONES
+void ShapeSkin::setInfluenceWidth(float j, float v1, float v0) { // ASSUME 3 BONES
+    std::cout << "v's are " << v1 << " " << v0 << std::endl;
     // HARD CODED WEIGHTS OF INFLUENCE AREA
+    // float vtotal = v0 + v1;
     weights_for_influencing.clear();
     weights_for_influencing.push_back(v0);
     weights_for_influencing.push_back(v1); // v0 is the same on both ends, v1 is in the middle
@@ -935,26 +944,38 @@ void ShapeSkin::setInfluenceWidth(float j, float v0, float v1) { // ASSUME 3 BON
     // std::cout << "start_h " << start_h << " and end_h " << end_h << std::endl;
 
     // go through each vertex and calcuate vertex weight
+    float deform;
     for (int i = start_v; i <= end_v; ++i) {
-        // 0 for start, 1 for middle, 2 for right
-        if (posBuf.at(i*3) < mid_x) { // if left
+        // 0 for start, 1 for middle, 2 (0 technically) for right
+        if (posBuf.at(i*3) < mid_x) { // if right
             prev_dist = posBuf.at(i*3) - start_x;
             post_dist = mid_x - posBuf.at(i*3);
-            ratio_first = prev_dist / prev_dist+post_dist;
-            vertex_deform.push_back(weights_for_influencing.at(0)*ratio_first + weights_for_influencing.at(1)*(1-ratio_first));
+            ratio_first = prev_dist / (prev_dist+post_dist);
+            deform = (weights_for_influencing.at(0)*ratio_first + weights_for_influencing.at(1)*(1-ratio_first));///vtotal;
         }
-        else if (posBuf.at(i*3) > mid_x) { // if right
-            prev_dist = posBuf.at(i*3) - start_x;
-            post_dist = mid_x - posBuf.at(i*3);
-            ratio_first = prev_dist / prev_dist+post_dist;
-            vertex_deform.push_back(weights_for_influencing.at(1)*ratio_first + weights_for_influencing.at(0)*(1-ratio_first));
+        else if (posBuf.at(i*3) > mid_x) { // if left
+            prev_dist = posBuf.at(i*3) - mid_x;
+            post_dist = end_x - posBuf.at(i*3);
+            ratio_first = prev_dist / (prev_dist+post_dist);
+            deform = (weights_for_influencing.at(1)*ratio_first + weights_for_influencing.at(0)*(1-ratio_first));///vtotal;
         }
         else { // if middle
-            vertex_deform.push_back(weights_for_influencing.at(1));
+            deform = weights_for_influencing.at(1);
+        }
+        // std::cout << deform << std::endl;
+        if (deform < 0.0) {
+            deform = 0.0;
+        }
+        else if (deform > 1.0) {
+            deform = 1.0;
         }
 
-        
+        vertex_deform.push_back(deform);
     }
 
-    // std::cout << "size is " << vertex_deform.size() << std::endl;
+    std::cout << "size is " << vertex_deform.size() << std::endl;
+
+    // for (int i =0; i < vertex_deform.size(); ++i) {
+    //     std::cout << vertex_deform.at(i) << std::endl;
+    // }
 }

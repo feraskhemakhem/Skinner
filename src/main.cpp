@@ -231,7 +231,6 @@ void init()
     progBonus->addUniform("ks");
     progBonus->addUniform("s");
     progBonus->setVerbose(false);
-	
 	// Initialize time.
 	glfwSetTime(0.0);
 	
@@ -303,6 +302,7 @@ void render(bool data = false)
 	glEnd();
 	int timeScale;
 	timeScale = (int)(t); // determines the relative speed of cheb
+	// timeScale = 0;
 	if(keyToggles[(unsigned)'b']) {
 		// dra	ng bones
 		float boneScale = 0.25f; // determines the size of the bones
@@ -319,20 +319,18 @@ void render(bool data = false)
 				glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 				glLineWidth(2);
 				glBegin(GL_LINES);
-				// glColor3f(1, 0, 0);
-				glColor3f(1, 1, 0);
+				glColor3f(1, 0, 0);
 				glVertex3f(0, 0, 0);
 				glVertex3f(boneScale, 0, 0);
-				// glColor3f(0, 1, 0);
-								glColor3f(1, 1, 0);
 
+				glColor3f(0, 1, 0);
 				glVertex3f(0, 0, 0);
 				glVertex3f(0, boneScale, 0);
-				// glColor3f(0, 0, 1);
-												glColor3f(1, 1, 0);
 
+				glColor3f(0, 0, 1);
 				glVertex3f(0, 0, 0);
 				glVertex3f(0, 0, boneScale);
+
 				glEnd();
 				MV->popMatrix();
 				// pog *= walker->getBind(i);
@@ -353,14 +351,14 @@ void render(bool data = false)
 		glUniform3f(progSkin->getUniform("kd"), 0.3f, 0.3f, 0.3f); // diffused colour
 		glUniform3f(progSkin->getUniform("ks"), 0.5f, 0.5f, 0.5f); // specular colour
 		glUniform1f(progSkin->getUniform("s"), 200.0f);
-		glUniform3f(progSkin->getUniform("ka"), 0.3f, 0.0f, 0.0f); // ambient colour (rgb)
+		glUniform3f(progSkin->getUniform("ka"), 0.3f, 0.3f, 0.3f); // ambient colour (rgb)
 
 		// apply skin
-		// if (DEFORM_FACTOR == 0)
-		// 	shape->skinOn(walker, timeScale, DEFORM_FACTOR);
-		// else
-		// 	shape->DQSskinOn(walker, timeScale);
-		shape->skinOn(walker, timeScale, DEFORM_VECTOR);
+		if (DEFORM_FACTOR == 0)
+			shape->LBSskinOn(walker, timeScale);
+		else
+			shape->DQSskinOn(walker, timeScale);
+		// shape->skinOn(walker, timeScale, DEFORM_VECTOR);
 
 		shape->setProgram(progSkin);
 		shape->draw();
@@ -389,12 +387,12 @@ int main(int argc, char **argv)
 	NUM_VERTICES_VERT = argc > 3 ? atoi(argv[3]) : 2;
 	RECT_WIDTH = argc > 4 ? atoi(argv[4]) : 20;
 	RECT_LENGTH = argc > 5 ? atoi(argv[5]) : 10;
-	DEFORM_FACTOR = argc > 6 ? atoi(argv[6]) : 0.5;
-	// INFLUENCE_WIDTH = argc > 7 ? atoi(argv[7])
+	DEFORM_FACTOR = argc > 6 ? atof(argv[6]) : 0.5;
 	INCREMENT = argc > 7 ? atoi(argv[7]) : -1;
 	temp_filename = argc > 8 ? argv[8] : "../data/temp_0.txt";
 	v0 = argc > 9 ? atof(argv[9]) : 1.0f;
-	v1 = argc > 10 ? atof(argv[9]) : 0.0f;
+	v1 = argc > 10 ? atof(argv[10]) : 0.0f;
+
 
 	// error checking: asserts to make sure valid input
 	assert (NUM_BONES > 1); // more than 1 bone
@@ -469,6 +467,7 @@ int main(int argc, char **argv)
 // this function writes data to a set of temporary files for python to read from
 void write_data(int increments) {
 	cout << endl;
+	tempFile << v0 << " " << v1 << endl; // write the w0 and w1 for reference
 	for (int i = 0; i < ceil(90.0/increments); ++i) {
 		t = i; // set time step
 		render(true);
