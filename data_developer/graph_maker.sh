@@ -20,7 +20,7 @@ make -j4
 # ./A6 3 1000 100 10 2 1 5 ../data/temp_14.txt 1 1 # DQS
 
 ./A6 3 1000 100 10 2 0 5 ../data/temp_0.txt 0 0 # LBS
-./A6 3 1000 100 10 2 1 5 ../data/temp_1.txt 1 1 # DQS
+./A6 3 1000 100 10 2 0 5 ../data/temp_1.txt 1 1 # DQS
 
 # LBS base
 

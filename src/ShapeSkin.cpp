@@ -681,7 +681,7 @@ void ShapeSkin::skinOn(std::shared_ptr<Skinner> skin, int k, const std::vector<f
 
         // deform = deform_factor->at(0);
 
-
+        // std::cout << "DEFORM: " << deform << std::endl;
 
         glm::mat4 interpol = (1-deform) * LBS(skin, i) + deform * DQS(skin, i);
         position = interpol * x;

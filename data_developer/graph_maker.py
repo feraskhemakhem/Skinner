@@ -39,12 +39,19 @@ for i in range (0, 2):
 
 		# plotting the points  
 		c = numpy.random.rand(3,)
-		plt.plot(angles, areas, color=c, linestyle='solid', linewidth = 3, marker='o', markerfacecolor=c, markersize=6, label = line_label)
+		if i == 0:
+			plt.plot(angles, areas, color=c, linestyle='solid', linewidth = 3, marker='o', markerfacecolor=c, markersize=6, label = "LBS")
+		else:
+			plt.plot(angles, areas, color=c, linestyle='solid', linewidth = 3, marker='o', markerfacecolor=c, markersize=6, label = "DQS")
+
+
+
+		# plt.plot(angles, areas, color=c, linestyle='solid', linewidth = 3, marker='o', markerfacecolor=c, markersize=6, label = line_label)
 
 
 # plot reference line
 x = numpy.linspace(min_angle ,max_angle,2)
-y = [19.9957, 19.9957]
+y = [20, 20]
 plt.plot(x, y, color='black', linestyle='dashed', linewidth = 3, marker='o', markerfacecolor='black', markersize=6, label = 'control') 
   
 # setting x and y axis range 
@@ -58,7 +65,9 @@ plt.ylabel('Area')
   
 # giving a title to my graph 
 # plt.title('Combinations of v0 and v1 and Their Resulting Areas Across Different Angles') 
-plt.title('Changes in Area of Mesh with Varying Values of w0 and w1 Across Different Angles') 
+# plt.title('Changes in Area of Mesh with Varying Values of w0 and w1 Across Different Angles') 
+plt.title('Changes in Area of Mesh with Using DQS and LBS Across Different Angles') 
+
 
 # provide key
 plt.legend(loc="upper left")
